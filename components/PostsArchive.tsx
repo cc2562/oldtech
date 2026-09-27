@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChannelDisplay } from "./ChannelDisplay";
-import { ChannelKnob, type Channel } from "./ChannelKnob";
+import { ChannelKnob, channels, type Channel } from "./ChannelKnob";
 import { HoverCoverPreview } from "./HoverCoverPreview";
 import { IndexLoader } from "./IndexLoader";
 import { PostRow } from "./PostRow";
@@ -16,6 +16,18 @@ import styles from "./PostsArchive.module.css";
 const HYDRATE = "rows --skin=index";
 /** Used when the admin setting is missing/invalid (后台 → 列表设置). */
 const DEFAULT_BATCH_SIZE = 5;
+
+/** Selected channel plus how many rows the reader had revealed. */
+type ArchiveView = { channel: Channel; shown: number };
+
+/**
+ * Browsing position of the archive, kept at module scope so it survives the
+ * client-side navigations the PJAX provider performs: returning from an article
+ * remounts this component, and in-memory state would drop the expanded batches
+ * back to the first one. Same idea as the `playedScripts` cache in
+ * QueryTerminal. A hard reload starts over — a fresh document has no history.
+ */
+let archiveView: ArchiveView | null = null;
 
 /** Load-more script: same terminal voice, offsetting into the archive. */
 const moreScript = (channel: Channel, offset: number, limit: number) => [
@@ -39,6 +51,36 @@ export function PostsArchive({ posts, batchSize = DEFAULT_BATCH_SIZE }: { posts:
   const [shown, setShown] = useState(size);
   /** Batch number currently being "fetched" by the terminal, null when idle. */
   const [pending, setPending] = useState<number | null>(null);
+  // Snapshot of the stored position, taken once before any write-back below, so
+  // the restore effect always reads what the previous visit left behind. The
+  // first render deliberately stays on the first batch (matches the SSR markup,
+  // no hydration mismatch); the restore happens in the effect.
+  const savedView = useRef<ArchiveView | null | undefined>(undefined);
+  if (savedView.current === undefined) savedView.current = archiveView;
+
+  // Restore channel and revealed batches, clamped against the current data so a
+  // changed batch size, fewer posts or a stale channel value stay safe.
+  useEffect(() => {
+    const saved = savedView.current;
+    if (!saved) return;
+    const nextChannel: Channel = channels.includes(saved.channel) ? saved.channel : "全部";
+    const total = nextChannel === "全部" ? posts.length : posts.filter((post) => post.category === nextChannel).length;
+    const nextShown = Math.min(Math.max(Math.trunc(saved.shown) || size, size), Math.max(total, size));
+    setChannel(nextChannel);
+    setShown(nextShown);
+    // A batch interrupted by the navigation is never resumed.
+    setPending(null);
+    // Ready must follow the restored channel, otherwise the terminal replays for
+    // a channel the reader has already seen.
+    setReady(hasQueryPlayed(scriptKey(nextChannel, scriptOptions)));
+    // Mount-only: `size` and the script options are stable props/derived values.
+  }, []);
+
+  // Mirror the position for the next visit.
+  useEffect(() => {
+    archiveView = { channel, shown };
+  }, [channel, shown]);
+
   const filteredPosts = channel === "全部" ? posts : posts.filter((post) => post.category === channel);
   const visiblePosts = filteredPosts.slice(0, shown);
   const remaining = filteredPosts.length - visiblePosts.length;

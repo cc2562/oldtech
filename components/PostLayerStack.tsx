@@ -54,13 +54,35 @@ export function PostLayerStack({ cover, body, echo }: { cover: ReactNode; body: 
     };
 
     setEnhanced(true);
+    // Keep the first paint pinned (the sticky CSS alone would let a tall layer
+    // overflow the viewport), then measure again once the enhanced layout is
+    // actually in the DOM: `data-enhanced` carries the body layer's reading
+    // padding and only lands on the commit after this effect, so this first
+    // pass still sees the unpadded height — and would let the echo board cover
+    // the article's ending too early until something forced a re-measure.
     measure();
+    const remeasure = requestAnimationFrame(measure);
+    // Layer heights also change after mount: fonts swap in, lazy images arrive
+    // (Markdown images have no reserved box). Stale tops would drift the same
+    // way, so re-measure whenever a layer resizes.
+    let measureRaf = 0;
+    const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(() => {
+      if (measureRaf) return;
+      measureRaf = requestAnimationFrame(() => {
+        measureRaf = 0;
+        measure();
+      });
+    });
+    layers.forEach((el) => observer?.observe(el));
     // Suppress the glitch animations for the state applied on first paint.
     const initTimer = setTimeout(() => setInit(false), 420);
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", measure);
     return () => {
       clearTimeout(initTimer);
+      cancelAnimationFrame(remeasure);
+      if (measureRaf) cancelAnimationFrame(measureRaf);
+      observer?.disconnect();
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", measure);
       if (raf) cancelAnimationFrame(raf);

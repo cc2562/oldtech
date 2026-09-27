@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArticleCard } from "./ArticleCard";
-import { ChannelKnob, type Channel } from "./ChannelKnob";
+import { ChannelKnob, channels, type Channel } from "./ChannelKnob";
 import { HeroParticles } from "./HeroParticles";
 import { IndexLoader } from "./IndexLoader";
 import { LazyImage } from "./LazyImage";
@@ -16,6 +16,14 @@ import type { PostSummary } from "@/lib/posts";
 import type { SiteData } from '@/lib/cms';
 import styles from "./HomeConsole.module.css";
 
+/**
+ * Channel last picked on the home console. Module scope keeps it across the
+ * client-side navigations the PJAX provider performs, so walking back from an
+ * article stays on the channel the reader was browsing — the same memory the
+ * archive index uses. Hard reloads start from 全部 again.
+ */
+let homeChannel: Channel | null = null;
+
 export function HomeConsole({ posts, author, site }: { posts: PostSummary[]; author: string; site: SiteData }) {
   const [channel, setChannel] = useState<Channel>("全部");
   // Terminal scripts quote the configured display count (后台 → 列表设置).
@@ -23,6 +31,26 @@ export function HomeConsole({ posts, author, site }: { posts: PostSummary[]; aut
   // Returning from an article (client-side nav) skips the query animation:
   // if this channel's script already played, cards are visible immediately.
   const [ready, setReady] = useState(() => hasQueryPlayed(scriptKey("全部", scriptOptions)));
+  // Snapshot read once, before the mirror effect below can overwrite it.
+  const savedChannel = useRef<Channel | null | undefined>(undefined);
+  if (savedChannel.current === undefined) savedChannel.current = homeChannel;
+
+  // Restored after mount rather than in the initial state: the first render has
+  // to stay on 全部 to match the server markup (no hydration mismatch).
+  useEffect(() => {
+    const saved = savedChannel.current;
+    if (!saved || saved === "全部" || !channels.includes(saved)) return;
+    setChannel(saved);
+    // Ready must follow the restored channel, or the terminal replays.
+    setReady(hasQueryPlayed(scriptKey(saved, scriptOptions)));
+    // Mount-only: the script options are stable props/derived values.
+  }, []);
+
+  // Mirror the channel for the next visit.
+  useEffect(() => {
+    homeChannel = channel;
+  }, [channel]);
+
   const visiblePosts = channel === "全部" ? posts : posts.filter((post) => post.category === channel);
   const featured = channel === "全部" ? visiblePosts.find((post) => post.featured) ?? visiblePosts[0] : visiblePosts[0];
   const rest = visiblePosts.filter((post) => post.id !== featured?.id);
