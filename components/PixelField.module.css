@@ -1,0 +1,3 @@
+.field { pointer-events: none; display: block; }
+.fixed { position: fixed; inset: 0; z-index: var(--z-pixel-field); }
+.contained { position: absolute; inset: 0; z-index: 0; }

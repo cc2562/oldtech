@@ -5,12 +5,12 @@
 .terminal p > span:first-child { color: var(--violet-bright); margin-right: 7px; }
 .terminal b { color: var(--signal); font-weight: 700; }
 .progressLine { display: grid; grid-template-columns: auto minmax(0,1fr) auto; align-items: center; gap: 9px; margin: 14px 0 8px; color: #d6cbdc; }
-.track { height: 15px; padding: 2px; border: 1px solid #8d809d; background: #151321; overflow: hidden; }
-.track i { display: block; width: 100%; height: 100%; background: repeating-linear-gradient(90deg, var(--signal) 0 9px, transparent 9px 12px); transform-origin: left; animation: boot 1s steps(14,end) both; }
+.progressChars { display: block; min-width: 0; padding: 2px 5px; border: 1px solid #8d809d; background: #151321; overflow: hidden; }
+.progressChars i { display: block; font-style: normal; white-space: nowrap; color: var(--signal); clip-path: inset(0 100% 0 0); animation: bootChars .9s steps(14, end) both; }
 .progressLine strong { color: var(--signal); }
 .prompt { color: var(--signal); }
 .cursor { animation: blink 1s steps(1,end) infinite; }
 .compact { padding: 13px; }
-@keyframes boot { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes bootChars { to { clip-path: inset(0 0 0 0); } }
 @keyframes blink { 50% { opacity: 0; } }
-@media (prefers-reduced-motion: reduce) { .track i, .cursor { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .cursor { animation: none; } }

@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { ArticleCard } from "@/components/ArticleCard";
 import { ButtonDemo } from "@/components/ButtonDemo";
 import { ChannelDemo } from "@/components/ChannelDemo";
+import { HeroParticles } from "@/components/HeroParticles";
+import { PixelField } from "@/components/PixelField";
 import { RetroWindow } from "@/components/RetroWindow";
 import { SiteInfoDialog } from "@/components/SiteInfoDialog";
 import { TerminalStatus } from "@/components/TerminalStatus";
@@ -45,7 +47,7 @@ export default function ComponentsPage() {
         <div className={styles.sectionTitle}><span>04</span><div><p>WINDOW SYSTEM</p><h2 id="window-title">窗口与终端</h2></div></div>
         <div className={styles.systemGrid}>
           <RetroWindow title="ARCHIVE_NOTICE.TXT" eyebrow="WINDOW 98 / PERSONAL FILE"><h3>界面正在调频。</h3><p>这是承载精选文章和系统消息的内容窗口。标题栏与边框负责表达年代感，正文仍以阅读为先。</p><div className={styles.windowAction}><SiteInfoDialog /></div></RetroWindow>
-          <TerminalStatus />
+          <TerminalStatus typewriter lines={["mount /archive", "connect personal_signal", "scan --channel=全部"]} />
         </div>
       </section>
 
@@ -61,7 +63,21 @@ export default function ComponentsPage() {
 
       <section className={styles.section} aria-labelledby="card-title">
         <div className={styles.sectionTitle}><span>06</span><div><p>CONTENT</p><h2 id="card-title">文章卡片</h2></div></div>
-        <div className={styles.cardPanel}><ArticleCard post={posts[1]} /><div className={styles.cardNotes}><span className={styles.noteTag}>DEMO DATA</span><h3>先让内容成立，再让细节发光。</h3><p>卡片展示标题、分类、摘要和阅读时间。第一阶段没有文章详情页，因此它保持静态，不制造无法完成的点击。</p><ul><li>分类清晰可辨</li><li>摘要保持舒适行距</li><li>元信息退居次要层级</li></ul></div></div>
+        <div className={styles.cardPanel}><ArticleCard post={posts[1]} /><div className={styles.cardNotes}><span className={styles.noteTag}>DEMO DATA</span><h3>每张卡片都是一扇小窗口。</h3><p>卡片套用了 Windows 98 的窗口语言：渐变标题栏、期号与文件名、装饰性窗口按钮，正文留在凹陷的内容区里。第一阶段没有文章详情页，因此它保持静态，不制造无法完成的点击。</p><ul><li>标题栏携带期号与文件名</li><li>摘要保持舒适行距</li><li>元信息退居次要层级</li></ul></div></div>
+      </section>
+
+      <section className={styles.section} aria-labelledby="ambient-title">
+        <div className={styles.sectionTitle}><span>07</span><div><p>AMBIENT</p><h2 id="ambient-title">环境层</h2></div></div>
+        <div className={styles.ambientGrid}>
+          <div>
+            <div className={styles.ambientBox}><HeroParticles /></div>
+            <p className={styles.ambientCaption}>HERO PARTICLES — 抖动像素流体团，亮黄与紫双阈值 Bayer 抖动，12 秒无缝循环，仅在首屏渲染。</p>
+          </div>
+          <div>
+            <div className={styles.ambientBox}><PixelField mode="contained" /></div>
+            <p className={styles.ambientCaption}>PIXEL FIELD — 像素点阵被光标推开并弹簧回位；触摸设备与“减少动态效果”下退化为静止点阵。</p>
+          </div>
+        </div>
       </section>
     </div>
   );

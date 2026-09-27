@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PixelField } from "@/components/PixelField";
 import { SiteHeader } from "@/components/SiteHeader";
 import { site } from "@/lib/site";
 import "./globals.css";
@@ -20,10 +21,12 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <SiteHeader />
           <main id="main-content">{children}</main>
           <footer className="site-footer">
-            <span>© 2026 {site.name}</span>
-            <span>一份正在成形的个人博客 / DESIGN DEMO</span>
+            <p className="footer-line"><span className="footer-prompt">{"C:\\NEON\\NOTES>"}</span> logoff --user=visitor</p>
+            <p className="footer-line muted">© 2026 {site.name} · 一份正在成形的个人博客 / DESIGN DEMO · SESSION CLOSED</p>
+            <p className="footer-line"><span className="footer-prompt">{"C:\\NEON\\NOTES>"}</span> exit<span className="footer-cursor" aria-hidden="true">_</span></p>
           </footer>
         </div>
+        <PixelField />
       </body>
     </html>
   );
