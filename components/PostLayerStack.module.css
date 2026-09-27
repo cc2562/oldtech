@@ -6,6 +6,12 @@
 @media (max-width: 600px) {
   .stack[data-enhanced] .layer { top: 76px; }
 }
+/* No-JS fallback: plain section gap between body and echo board. */
+.layer[data-layer="1"] { margin-bottom: 26px; }
+/* Enhanced stack: padding grows offsetHeight, so the tall body layer sticks
+   higher (its ending lifts above the viewport bottom edge) and the echo board
+   arrives later in the flow, delaying the cover-over handover. */
+.stack[data-enhanced] .layer[data-layer="1"] { margin-bottom: 0; padding-bottom: clamp(160px, 32vh, 340px); }
 .layerInner { position: relative; transition: filter .45s ease; }
 .stack[data-enhanced] .layerInner { box-shadow: 0 -26px 48px #05030880; }
 .layerInner::before {

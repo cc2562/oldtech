@@ -1,6 +1,7 @@
 "use client";
 
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
+import { LazyImage } from "./LazyImage";
 import styles from "./HoverCoverPreview.module.css";
 
 export interface HoverCoverPreviewHandle {
@@ -121,7 +122,7 @@ export const HoverCoverPreview = forwardRef<HoverCoverPreviewHandle>(function Ho
           <span className={styles.barName}>{label || "SIGNAL_PREVIEW.BMP"}</span>
           <span className={styles.barCtrl}><i /></span>
         </div>
-        <div className={styles.body}>{cover ? <img src={cover.src} alt="" /> : null}</div>
+        <div className={styles.body}>{cover ? <LazyImage className={styles.previewImage} src={cover.src} alt="" /> : null}</div>
       </div>
     </div>
   );

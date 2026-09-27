@@ -1,0 +1,33 @@
+.lazy { position: relative; display: block; overflow: hidden; background: #0d0a14; }
+.lazy .img { position: absolute; z-index: 1; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.lazy[data-fit="contain"] .img { object-fit: contain; }
+/* Natural layout: unknown intrinsic size (Markdown / external images). The img
+   stays in normal flow so the wrapper grows to the real image height, and the
+   placeholder (absolutely positioned, z-index 0) stays visible underneath
+   while loading. The reserved height applies only during loading so short
+   images leave no empty band afterwards; SSR / no-JS keeps plain flow. */
+.lazy[data-js][data-layout="natural"]:not([data-loaded]) { min-height: clamp(120px, 24vw, 220px); }
+.lazy[data-layout="natural"] .img { position: relative; z-index: 1; inset: auto; display: block; width: auto; max-width: 100%; height: auto; margin: 0 auto; }
+/* Hide alt glyphs while the image has no pixels yet. */
+.lazy:not([data-loaded]) .img { color: transparent; }
+/* JS only: keep pixels invisible until load completes — no progressive
+   scanline reveal, and no stale previous image after a src swap. The glitch
+   animation then brings the image in all at once. SSR/no-JS never sets
+   data-js, so images render normally as a fallback. */
+.lazy[data-js]:not([data-loaded]) .img { opacity: 0; }
+.lazy[data-loaded] .img { animation: imgGlitchIn .42s steps(3, end) 1; }
+.lazy[data-loaded][data-effect="none"] .img { animation: none; }
+.lazy[data-loaded][data-effect="none"] .ph { transition: none; }
+/* Code-style placeholder behind the image: visible through the transparent,
+   still-loading img, covered once pixels arrive — works without JS too. */
+.lazy .ph { position: absolute; z-index: 0; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; padding: 8px; background: repeating-linear-gradient(0deg, #0d0a14 0 3px, #140b20 3px 4px); color: #b78af0; font: 700 11px/1.5 var(--font-mono); letter-spacing: .06em; text-align: center; overflow-wrap: anywhere; }
+.lazy .phBar { color: #8d8199; }
+.lazy .phCursor { font-style: normal; color: var(--signal); animation: phBlink 1s steps(2, end) infinite; }
+.lazy[data-loaded] .ph { opacity: 0; transition: opacity .2s ease; }
+@keyframes phBlink { 50% { opacity: 0; } }
+@keyframes imgGlitchIn {
+  0% { opacity: 0; clip-path: inset(12% 0 64% 0); transform: translate(-4px, 1px); filter: drop-shadow(-3px 0 #f4ed18) drop-shadow(3px 0 #8244c7); }
+  30% { opacity: 1; clip-path: inset(52% 0 10% 0); transform: translate(3px, -1px); filter: none; }
+  60% { clip-path: inset(4% 0 38% 0); transform: translate(-2px, 0); filter: drop-shadow(2px 0 #b78af0) drop-shadow(-2px 0 #f4ed18); }
+  100% { opacity: 1; clip-path: inset(0); transform: none; filter: none; }
+}

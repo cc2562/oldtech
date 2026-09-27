@@ -2,7 +2,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
-import { buildConfig, type CollectionConfig, type GlobalConfig } from 'payload'
+import { buildConfig, ValidationError, type CollectionConfig, type GlobalConfig } from 'payload'
 import sharp from 'sharp'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
@@ -27,6 +27,26 @@ function richTextToPlainText(value: unknown): string {
 
 function normalizeArticleText(value: unknown) {
   return richTextToPlainText(value).replace(/\s+/g, ' ').trim()
+}
+
+// Strips common Markdown syntax so reading time and auto excerpts work for
+// Markdown bodies the same way they do for Lexical rich text.
+function markdownToPlainText(value: unknown): string {
+  if (typeof value !== 'string') return ''
+  return value
+    .replace(/```[\s\S]*?```/g, ' ')
+    .replace(/`[^`]*`/g, ' ')
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+    .replace(/^\s{0,3}#{1,6}\s+/gm, '')
+    .replace(/^\s{0,3}>\s?/gm, '')
+    .replace(/^\s*[-*+]\s+/gm, '')
+    .replace(/^\s*\d+\.\s+/gm, '')
+    .replace(/^\s*\|?[\s:|-]+\|?\s*$/gm, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/[|*_~]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
 }
 
 function excerptFromText(text: string) {
@@ -77,8 +97,17 @@ const Posts: CollectionConfig = {
   hooks: {
     beforeValidate: [({ data, originalDoc }) => {
       if (!data) return data
+      const markdown = data.bodyMarkdown ?? originalDoc?.bodyMarkdown
       const body = data.body ?? originalDoc?.body
-      const articleText = normalizeArticleText(body)
+      // Markdown takes priority for derived values when both are present,
+      // matching the front-end rendering priority.
+      const articleText = markdownToPlainText(markdown) || normalizeArticleText(body)
+      if (!articleText) {
+        throw new ValidationError({
+          collection: 'posts',
+          errors: [{ path: 'bodyMarkdown', message: '请填写富文本正文或 Markdown 正文（至少一种）。' }],
+        })
+      }
       data.readingMinutes = readingMinutesFromText(articleText)
       const currentExcerpt = data.excerpt ?? originalDoc?.excerpt
       if (!String(currentExcerpt || '').trim()) data.excerpt = excerptFromText(articleText)
@@ -99,7 +128,8 @@ const Posts: CollectionConfig = {
     { name: 'publishedAt', type: 'date', admin: { date: { pickerAppearance: 'dayAndTime' } } },
     { name: 'readingMinutes', type: 'number', required: true, min: 1, max: 999, admin: { readOnly: true, description: '根据正文长度自动计算。' } },
     { name: 'cover', type: 'upload', relationTo: 'media' },
-    { name: 'body', type: 'richText', required: true },
+    { name: 'body', type: 'richText' },
+    { name: 'bodyMarkdown', label: 'Markdown 正文', type: 'textarea', admin: { description: '与富文本正文二选一；填写后前台优先渲染 Markdown（支持 GFM 表格、任务列表、删除线与代码高亮，图片写法 ![说明](图片地址)）。' } },
     { name: 'pullQuote', type: 'textarea' },
   ],
 }

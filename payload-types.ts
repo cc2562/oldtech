@@ -211,7 +211,7 @@ export interface Post {
    */
   readingMinutes: number;
   cover?: (number | null) | Media;
-  body: {
+  body?: {
     root: {
       type: string;
       children: {
@@ -225,7 +225,11 @@ export interface Post {
       version: number;
     };
     [k: string]: unknown;
-  };
+  } | null;
+  /**
+   * 与富文本正文二选一；填写后前台优先渲染 Markdown（支持 GFM 表格、任务列表、删除线与代码高亮，图片写法 ![说明](图片地址)）。
+   */
+  bodyMarkdown?: string | null;
   pullQuote?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -435,6 +439,7 @@ export interface PostsSelect<T extends boolean = true> {
   readingMinutes?: T;
   cover?: T;
   body?: T;
+  bodyMarkdown?: T;
   pullQuote?: T;
   updatedAt?: T;
   createdAt?: T;

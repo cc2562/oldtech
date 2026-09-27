@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LazyImage } from "./LazyImage";
 import type { PostSummary } from "@/lib/posts";
 import styles from "./ArticleCard.module.css";
 
@@ -22,7 +23,7 @@ export function ArticleCard({ post, featured = false }: { post: PostSummary; fea
           <Titlebar issue={post.issue} demo={post.isDemo} kind="FEATURED" />
           <div className={styles.featureMain}>
             <div className={styles.featureVisual}>
-              {post.cover ? <img className={styles.featureImage} src={post.cover.src} alt={post.cover.alt} /> : <div className={styles.featureDial} aria-hidden="true"><span>FUTURE<br />MEMORY</span></div>}
+              {post.cover ? <LazyImage className={styles.featureImage} src={post.cover.src} alt={post.cover.alt} label={`POST_${post.issue}.BMP`} /> : <div className={styles.featureDial} aria-hidden="true"><span>FUTURE<br />MEMORY</span></div>}
               <span className={styles.visualIndex}>N° {post.issue} / SIGNAL ARCHIVE</span>
             </div>
             <div className={styles.featureBody}>

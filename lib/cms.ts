@@ -16,13 +16,13 @@ export type SiteData = {
 }
 
 export type PublicComment = { id: string; author: string; postedAt: string; text: string; site?: string; parentId?: string }
-export type PublicPost = PostSummary & { body: SerializedEditorState; pullQuote: string; comments: PublicComment[] }
+export type PublicPost = PostSummary & { body: SerializedEditorState | null; bodyMarkdown: string; pullQuote: string; comments: PublicComment[] }
 
 type MediaDoc = { url?: string | null; alt?: string | null }
 type CmsPost = {
   id: number | string; slug: string; title: string; excerpt?: string | null; category: PostSummary['category']
   publishedAt?: string | null; readingMinutes?: number | null; issue: string; featured?: boolean | null
-  cover?: number | string | MediaDoc | null; body: SerializedEditorState; pullQuote?: string | null
+  cover?: number | string | MediaDoc | null; body?: SerializedEditorState | null; bodyMarkdown?: string | null; pullQuote?: string | null
 }
 
 export async function cms() { return getPayload({ config }) }
@@ -53,7 +53,7 @@ export async function getPost(slug: string, preview = false): Promise<PublicPost
   if (!post) return null
   const comments = await payload.find({ collection: 'comments', where: { and: [{ post: { equals: post.id } }, { status: { equals: 'approved' } }] }, sort: 'createdAt', pagination: false, depth: 0, overrideAccess: false })
   return {
-    ...summary(post), body: post.body, pullQuote: post.pullQuote || '',
+    ...summary(post), body: post.body ?? null, bodyMarkdown: post.bodyMarkdown || '', pullQuote: post.pullQuote || '',
     comments: comments.docs.map((item) => {
       let publicSite: string | undefined
       if (item.site) {

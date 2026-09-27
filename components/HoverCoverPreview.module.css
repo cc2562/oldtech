@@ -37,7 +37,7 @@
   background: #0b0d12;
   box-shadow: inset 2px 2px var(--win-bevel-lo), inset -2px -2px var(--win-bevel-hi);
 }
-.body img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.previewImage { width: 100%; height: 100%; }
 .body::after {
   content: "";
   position: absolute;

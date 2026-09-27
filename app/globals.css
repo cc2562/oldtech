@@ -71,3 +71,61 @@ main#main-content:focus { outline: none; }
 @media (prefers-reduced-motion: reduce) { .footer-cursor { animation: none; } }
 @media (max-width: 600px) { html { scroll-padding-top: 88px; } .site-frame { width: min(100% - 14px, 1460px); } main#main-content { padding-top: 76px; } .site-footer { padding: 13px 14px; } }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+
+/* ---- Article reading typography -------------------------------------------
+   Shared by Markdown and Lexical rich-text bodies. Global class names keep the
+   styles in one place (the /components showcase reuses them) and let
+   third-party highlight/GFM class names be targeted from here. */
+.prose { max-width: 680px; margin: 0 auto; }
+.prose p { margin: 0 0 22px; color: var(--paper); font-size: 16px; line-height: 1.9; }
+.prose img { max-width: 100%; }
+.prose figure { max-width: 100%; margin: 26px 0; overflow: hidden; }
+.prose figure img { margin: 0 auto; }
+.proseImage { margin: 26px auto; border: 2px inset #87818e; background: #100c17; }
+.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 { margin: 40px 0 14px; color: #f8f6ff; line-height: 1.35; letter-spacing: -.02em; }
+.prose h2 { padding-bottom: 10px; border-bottom: 4px double #ac9eb9; font-size: clamp(24px, 2.8vw, 30px); }
+.prose h3 { font-size: clamp(20px, 2.3vw, 24px); }
+.prose h4 { font-size: 18px; }
+.prose h2::before, .prose h3::before, .prose h4::before { margin-right: 10px; color: var(--signal); font-family: var(--font-mono); font-weight: 700; letter-spacing: 0; }
+.prose h2::before { content: "#"; }
+.prose h3::before { content: "##"; font-size: .8em; }
+.prose h4::before { content: "###"; font-size: .7em; }
+.prose blockquote { margin: 26px 0; padding: 12px 20px; border-left: 3px solid var(--violet-bright); background: #8244c71a; color: #ead9f5; }
+.prose blockquote p { margin: 0 0 10px; }
+.prose blockquote p:last-child { margin-bottom: 0; }
+.prose code { padding: 1px 6px; border: 1px solid #554262; background: #2e2139; color: var(--signal); font: 700 .92em var(--font-mono); }
+.prose pre { margin: 26px 0; padding: 16px 18px; border: 2px inset #746680; background: #100c17; overflow-x: auto; color: #e4deea; font: 400 13px/1.7 var(--font-mono); }
+.prose pre code { padding: 0; border: 0; background: none; color: inherit; font-size: inherit; }
+.prose ul, .prose ol { margin: 0 0 22px; padding-left: 28px; color: var(--paper); font-size: 16px; line-height: 1.9; }
+.prose li { margin-bottom: 6px; }
+.prose li::marker { color: var(--signal); font-family: var(--font-mono); }
+.prose a { color: var(--signal); text-decoration: underline; text-underline-offset: 3px; }
+.prose a:hover { color: #fff88b; }
+.prose strong { color: #fff; }
+.prose hr { margin: 34px 0; border: 0; border-top: 4px double #ac9eb9; }
+.prose table { width: 100%; margin: 0 0 22px; border-collapse: collapse; font-size: 14px; }
+.prose th, .prose td { padding: 8px 12px; border: 1px solid #554262; text-align: left; }
+.prose th { background: #2e2139; color: var(--signal); font-family: var(--font-mono); }
+.prose blockquote.pullQuote { margin: 30px 0; padding: 14px 20px; border-left: 3px solid var(--signal); background: #f4ed1810; color: #fff4b9; font-size: 18px; font-weight: 700; line-height: 1.7; }
+
+/* Markdown body extras (GFM task lists, footnotes) — global class names come
+   from remark-gfm, so they cannot live in a CSS module. */
+.prose .contains-task-list { padding-left: 4px; }
+.prose .task-list-item { list-style: none; margin-left: 0; }
+.prose .task-list-item input[type="checkbox"] { width: 15px; height: 15px; margin: 0 8px 0 0; vertical-align: -2px; accent-color: var(--signal); }
+.prose [data-footnotes] { margin-top: 38px; padding-top: 18px; border-top: 4px double #ac9eb9; color: var(--muted); font-size: 14px; }
+.prose [data-footnote-ref] { padding: 0 3px; color: var(--signal); font: 700 .85em var(--font-mono); }
+/* Code highlighting (rehype-highlight / highlight.js): signal yellow, EVA
+   violet and chrome only — no red anywhere, transparent background so the
+   existing terminal-style `pre` frame shows through. */
+.prose .hljs { background: transparent; color: #e4deea; }
+.prose .hljs-comment, .prose .hljs-quote { color: #8d8199; font-style: italic; }
+.prose .hljs-keyword, .prose .hljs-selector-tag, .prose .hljs-literal, .prose .hljs-doctag, .prose .hljs-name, .prose .hljs-meta .hljs-keyword { color: var(--signal); }
+.prose .hljs-string, .prose .hljs-selector-attr, .prose .hljs-selector-pseudo, .prose .hljs-regexp, .prose .hljs-addition, .prose .hljs-attribute { color: var(--violet-bright); }
+.prose .hljs-number, .prose .hljs-symbol, .prose .hljs-bullet, .prose .hljs-link, .prose .hljs-meta { color: #fff88b; }
+.prose .hljs-title, .prose .hljs-section, .prose .hljs-function .hljs-title { color: #f5edff; font-weight: 700; }
+.prose .hljs-built_in, .prose .hljs-type, .prose .hljs-class .hljs-title { color: #c0c6d4; }
+.prose .hljs-variable, .prose .hljs-template-variable, .prose .hljs-params, .prose .hljs-attr, .prose .hljs-property { color: #ead9f5; }
+.prose .hljs-deletion { color: var(--violet); }
+.prose .hljs-strong { font-weight: 700; }
+.prose .hljs-emphasis { font-style: italic; }

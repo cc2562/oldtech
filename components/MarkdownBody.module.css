@@ -1,0 +1,6 @@
+.body { display: block; }
+.body > :first-child { margin-top: 0; }
+/* Images reuse the shared `.proseImage` style (app/globals.css). */
+/* Wide GFM tables scroll inside the reading column instead of overflowing. */
+.tableWrap { margin: 0 0 22px; overflow-x: auto; }
+.tableWrap table { margin-bottom: 0; }

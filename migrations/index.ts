@@ -1,6 +1,7 @@
 import * as migration_20260927_123104_initial_blog from './20260927_123104_initial_blog';
 import * as migration_20260927_131835_add_profile_avatar from './20260927_131835_add_profile_avatar';
 import * as migration_20260927_132459_add_comment_replies from './20260927_132459_add_comment_replies';
+import * as migration_20260927_145628_add_markdown_body from './20260927_145628_add_markdown_body';
 
 export const migrations = [
   {
@@ -16,6 +17,11 @@ export const migrations = [
   {
     up: migration_20260927_132459_add_comment_replies.up,
     down: migration_20260927_132459_add_comment_replies.down,
-    name: '20260927_132459_add_comment_replies'
+    name: '20260927_132459_add_comment_replies',
+  },
+  {
+    up: migration_20260927_145628_add_markdown_body.up,
+    down: migration_20260927_145628_add_markdown_body.down,
+    name: '20260927_145628_add_markdown_body'
   },
 ];

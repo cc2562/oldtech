@@ -10,6 +10,8 @@ import { RetroWindow } from "@/components/RetroWindow";
 import { RetroLink } from "@/components/RetroButton";
 import { SiteInfoDialog } from "@/components/SiteInfoDialog";
 import { TerminalStatus } from "@/components/TerminalStatus";
+import { LazyImage } from "@/components/LazyImage";
+import { MarkdownBody } from "@/components/MarkdownBody";
 import { LinkCard } from "@/components/LinkCard";
 import { friendLinks } from "@/lib/links";
 import { getPublishedPosts } from '@/lib/cms';
@@ -17,6 +19,33 @@ import { site } from '@/lib/site';
 import styles from "./page.module.css";
 
 export const metadata: Metadata = { title: "组件展台" };
+
+// Demo Markdown body: the exact syntax an article would carry, including GFM
+// table / task list, a highlighted code block and a lazily loaded image.
+const markdownSample = `## 信号日志 // 004
+
+Markdown 正文与富文本正文二选一：填写后前台优先渲染 Markdown，适合从 Typecho 等来源直接粘贴原文。
+
+> 排版沿用站内统一的阅读样式：标题带 \`#\` 标记，引用是紫色信号块，代码走终端风凹陷框。
+
+- **加粗**、*斜体* 与 ~~删除线~~ 都能正常显示
+- [x] 任务列表：已完成的条目
+- [ ] 待办：继续观测信号
+
+| 频道 | 记录 | 状态 |
+| --- | --- | --- |
+| 技术 | 02 | ONLINE |
+| 设计 | 01 | ONLINE |
+
+\`\`\`ts
+export function lockChannel(channel: Channel) {
+  // 注释：信号锁定后只展示对应频道
+  return signals.filter((item) => item.channel === channel)
+}
+\`\`\`
+
+![雨天霓虹占位封面](/covers/signal-003.svg "SIGNAL_003.BMP")
+`;
 
 const colors = [
   { name: "SIGNAL YELLOW", token: "--signal", value: "#F4ED18", className: styles.signal },
@@ -126,6 +155,20 @@ export default async function ComponentsPage() {
           </div>
         </div>
         <p className={styles.ambientCaption}>LINK CARD — /links 友情链接页视口内的网页卡片；域名行由 URL 自动提取，长描述在 320px 宽度下不溢出。</p>
+      </section>
+
+      <section className={styles.section} aria-labelledby="media-title">
+        <div className={styles.sectionTitle}><span>11</span><div><p>MEDIA</p><h2 id="media-title">懒加载图片</h2></div></div>
+        <LazyImage className={styles.lazyDemo} src="/covers/signal-002.svg" alt="拟物按钮状态占位封面（演示）" label="DEMO_002.SVG" />
+        <p className={styles.ambientCaption}>LAZY IMAGE — 全站图片统一入口：非首屏图片原生懒加载，代码式占位符（&gt; decode … + █ 进度行）垫在图下，加载完成后故障抖动切入；首屏关键图（首页精选 / 详情封面）eager 高优先级不延迟；不支持懒加载的旧浏览器忽略属性、正常加载；动态换图（悬浮预览、正文插图）自动重放占位与过渡。本地图片加载极快，占位符可能只是一闪而过。</p>
+      </section>
+
+      <section className={styles.section} aria-labelledby="markdown-title">
+        <div className={styles.sectionTitle}><span>12</span><div><p>WRITING FORMAT</p><h2 id="markdown-title">Markdown 正文</h2></div></div>
+        <div className={styles.markdownPanel}>
+          <div className="prose"><MarkdownBody source={markdownSample} /></div>
+        </div>
+        <p className={styles.ambientCaption}>MARKDOWN BODY — 后台「Markdown 正文」与富文本正文二选一，填写 Markdown 时前台优先渲染（适合从 Typecho 等来源直接粘贴原文）。以上示例即由 MarkdownBody 渲染：GFM 表格、任务列表、删除线可用，代码块按语言着色（信号黄 / EVA 紫 / 银铬，无红色），图片经 LazyImage 懒加载并限宽在阅读列内。</p>
       </section>
     </div>
   );

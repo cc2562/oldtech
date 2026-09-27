@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import { LazyImage } from './LazyImage';
 import type { SiteData } from '@/lib/cms';
 import styles from "./AuthorCard.module.css";
 
@@ -14,11 +15,11 @@ export function AuthorCard({ site }: { site: SiteData }) {
         <div className={styles.avatar} aria-hidden="true">
           <span className={styles.avatarGlyph}>{Array.from(site.author.trim())[0] || 'N'}</span>
           {showAvatar && (
-            <img
+            <LazyImage
               className={styles.avatarImage}
-              src={site.avatar?.src}
+              src={site.avatar?.src ?? ''}
               alt=""
-              decoding="async"
+              label="OPERATOR.BMP"
               onError={() => setFailedAvatar(site.avatar?.src)}
             />
           )}

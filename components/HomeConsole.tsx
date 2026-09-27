@@ -1,10 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { ArticleCard } from "./ArticleCard";
 import { ChannelKnob, type Channel } from "./ChannelKnob";
 import { HeroParticles } from "./HeroParticles";
 import { IndexLoader } from "./IndexLoader";
+import { LazyImage } from "./LazyImage";
 import { QueryTerminal, hasQueryPlayed, scriptFor, scriptKey } from "./QueryTerminal";
 import { RetroLink } from "./RetroButton";
 import { RetroWindow } from "./RetroWindow";
@@ -46,8 +48,14 @@ export function HomeConsole({ posts, author, site }: { posts: PostSummary[]; aut
 
             <div className={styles.featureZone}>
               <RetroWindow title="FEATURED_POST.EXE" eyebrow="EDITOR'S PICK" className={styles.featureWindow}>
-                <div className={styles.featureMedia}>{featured?.cover ? <img className={styles.featureImage} src={featured.cover.src} alt={featured.cover.alt} /> : <div className={styles.orbit} aria-hidden="true"><span>{featured?.issue ?? "000"}</span></div>}<span className={styles.mediaCaption}>N/N — SIGNAL {featured?.issue ?? "000"}</span></div>
-                <div className={styles.featureCopy}><span className={styles.featureTag}>{featured?.category ?? "频道"} / 精选文章</span><h2>{featured?.title ?? "暂无文章"}</h2><p>{featured?.excerpt ?? "这个频道还没有内容。"}</p><span className={styles.featureMeta}>{featured?.publishedAt.replaceAll("-", ".")} / {featured?.readingMinutes} MIN READ</span></div>
+                {featured ? (
+                  <Link href={`/posts/${featured.slug}`} className={styles.featureLink}>
+                    <div className={styles.featureMedia}>{featured.cover ? <LazyImage className={styles.featureImage} src={featured.cover.src} alt={featured.cover.alt} eager label={`POST_${featured.issue}.BMP`} /> : <div className={styles.orbit} aria-hidden="true"><span>{featured.issue}</span></div>}<span className={styles.mediaCaption}>N/N — SIGNAL {featured.issue}</span></div>
+                    <div className={styles.featureCopy}><span className={styles.featureTag}>{featured.category} / 精选文章</span><h2>{featured.title}</h2><p>{featured.excerpt}</p><span className={styles.featureMeta}>{featured.publishedAt.replaceAll("-", ".")} / {featured.readingMinutes} MIN READ</span></div>
+                  </Link>
+                ) : (
+                  <div className={styles.featureCopy}><span className={styles.featureTag}>频道 / 精选文章</span><h2>暂无文章</h2><p>这个频道还没有内容。</p></div>
+                )}
               </RetroWindow>
             </div>
           </div>
