@@ -1,0 +1,48 @@
+:root {
+  color-scheme: dark;
+  --ink: #150e23;
+  --night: #0e0a18;
+  --panel: #20152f;
+  --panel-raised: #2b1b40;
+  --chrome-high: #f5f3fa;
+  --chrome-mid: #aaa6b6;
+  --chrome-dark: #514b5c;
+  --acid-pink: #d2a8f5;
+  --bevel-line: #e8e3ef;
+  --warning-stripe: repeating-linear-gradient(125deg, var(--signal) 0 9px, #1b1423 9px 18px);
+  --violet: #8244c7;
+  --violet-bright: #b78af0;
+  --signal: #f4ed18;
+  --paper: #f4f0fb;
+  --muted: #b6a9c8;
+  --line: #65507680;
+  --line-strong: #8a6ca080;
+  --font-body: "Noto Sans SC", "Microsoft YaHei", "PingFang SC", sans-serif;
+  --font-display: "Arial Black", "Helvetica Neue", var(--font-body);
+  --font-mono: "IBM Plex Mono", "Consolas", monospace;
+  --space-1: .25rem;
+  --space-2: .5rem;
+  --space-3: .75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4.5rem;
+  --radius-sm: 2px;
+  --radius-md: 3px;
+  --radius-lg: 4px;
+  --shadow-panel: 5px 6px 0 #07050c, inset 1px 1px 0 #ffffff24;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; min-width: 320px; background: #0b0811; color: var(--paper); font-family: var(--font-body); font-size: 16px; line-height: 1.65; }
+body::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(circle at 53% -15%, #8c4fad5c, transparent 48%), repeating-linear-gradient(135deg, #ffffff04 0 1px, transparent 1px 10px), #0b0811; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }
+:focus-visible { outline: 3px solid var(--signal); outline-offset: 4px; }
+::selection { background: var(--signal); color: var(--ink); }
+.site-frame { width: min(100% - 36px, 1460px); margin: 0 auto; }
+.site-footer { display: flex; justify-content: space-between; gap: 20px; margin-top: var(--space-8); padding: 20px 0 32px; border-top: 4px double #9e8eae; color: var(--muted); font: 600 12px/1.6 var(--font-mono); letter-spacing: .03em; }
+@media (max-width: 600px) { .site-frame { width: min(100% - 14px, 1460px); } .site-footer { flex-direction: column; gap: 6px; } }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }

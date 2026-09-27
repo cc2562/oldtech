@@ -1,0 +1,16 @@
+.header { min-height: 77px; display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 10px 0; border-bottom: 4px ridge #94889e; }
+.brand { display: inline-flex; align-items: center; gap: 11px; flex-shrink: 0; }
+.mark { width: 43px; height: 43px; display: grid; place-items: center; border: 2px solid #fffbb0; background: linear-gradient(160deg,#fff675,#e6d709); color: #171120; box-shadow: 3px 3px 0 #544d00, inset 1px 1px #fff; font: 900 27px/1 var(--font-display); letter-spacing: -.1em; clip-path: polygon(0 0,86% 0,100% 14%,100% 100%,0 100%); }
+.mark span { color: var(--violet); }
+.wordmark { color: var(--paper); font: 900 18px/1 var(--font-display); letter-spacing: .025em; white-space: nowrap; text-shadow: 2px 2px #50345f; }
+.wordmark span { color: var(--signal); margin: 0 2px; }
+.nav { display: flex; align-items: stretch; gap: 3px; padding: 4px; border: 2px ridge #a09aaa; background: linear-gradient(180deg,#c7c3ce,#777181); box-shadow: 3px 3px 0 #0a0710; }
+.nav a { display: flex; align-items: center; gap: 6px; min-height: 30px; padding: 5px 13px; border: 1px solid #37303f; background: #211728; color: #d4cadb; font-size: 13px; font-weight: 800; white-space: nowrap; transition: background-color .15s, color .15s; }
+.nav a:hover { background: #52336a; color: #fff; }
+.nav a[aria-current="page"] { background: var(--signal); color: #17111d; box-shadow: inset 2px 2px #fffdb6, inset -2px -2px #8c7a04; }
+.nav a span { font: 700 10px var(--font-mono); opacity: .72; }
+.edition { color: #d8cddd; font: 800 11px var(--font-mono); letter-spacing: .08em; white-space: nowrap; }
+.edition b { color: var(--signal); }
+@media (max-width: 900px) { .edition { display: none; } }
+@media (max-width: 600px) { .header { min-height: 66px; gap: 8px; } .mark { width: 34px; height: 34px; font-size: 22px; } .wordmark { font-size: 12px; } .brand { gap: 6px; } .nav a { min-height: 28px; padding: 3px 7px; font-size: 12px; } .nav a span { display: none; } }
+@media (max-width: 370px) { .wordmark { display: none; } }

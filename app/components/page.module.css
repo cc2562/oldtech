@@ -1,0 +1,45 @@
+.page { padding: 24px 0 0; }
+.intro { position: relative; max-width: none; margin-bottom: 48px; padding: clamp(25px,4vw,52px); border: 5px ridge #b5aebe; background: radial-gradient(ellipse at 80% 25%,#9450ad6b,transparent 45%),repeating-linear-gradient(135deg,#ffffff05 0 1px,transparent 1px 12px),#181020; box-shadow: 6px 7px 0 #050308; }
+.intro::after { content: "NN / COMPONENT CATALOG"; position: absolute; right: 15px; top: 13px; color: #b8a6c5; font: 700 10px var(--font-mono); }
+.eyebrow { margin: 0 0 12px; color: var(--signal); font: 800 12px var(--font-mono); letter-spacing: .13em; }
+.intro h1 { margin: 0; font-size: clamp(45px, 6vw, 80px); letter-spacing: -.065em; line-height: 1.15; background: linear-gradient(#fff,#b8b1c4 45%,#fff 55%,#868091); background-clip: text; -webkit-background-clip: text; color: transparent; filter: drop-shadow(3px 4px 0 #2a1437); }
+.cursor { color: var(--signal); }
+.intro > p:last-child { max-width: 650px; margin: 21px 0 0; color: #d2c8de; font-size: 17px; line-height: 1.85; }
+.section { margin-top: 48px; }
+.sectionTitle { display: flex; align-items: baseline; gap: 18px; margin-bottom: 16px; padding: 10px 14px; border: 3px ridge #a99db4; background: linear-gradient(90deg,#32203f,#17101d); }
+.sectionTitle > span { color: var(--signal); font: 900 27px var(--font-display); }
+.sectionTitle p { margin: 0 0 3px; color: var(--violet-bright); font: 700 11px var(--font-mono); letter-spacing: .13em; }
+.sectionTitle h2 { margin: 0; font-size: clamp(26px, 3vw, 38px); line-height: 1.2; letter-spacing: -.04em; }
+.swatches { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+.swatch { overflow: hidden; border: 3px ridge #a59aaa; background: var(--panel); box-shadow: 3px 4px 0 #050308; }
+.swatchColor { height: 138px; border-bottom: 1px solid var(--line); }
+.signal { background: linear-gradient(135deg, #fff88b, var(--signal) 60%, #cdb900); }
+.violet { background: linear-gradient(135deg, #d3a4ff, var(--violet) 55%, #36154f); }
+.night { background: radial-gradient(circle at 70% 25%, #392354, var(--night) 65%); }
+.paper { background: linear-gradient(135deg, #fff, var(--paper) 65%, #9b96a9); }
+.swatchInfo { padding: 16px; }
+.swatchInfo strong, .swatchInfo span { display: block; }
+.swatchInfo strong { font: 800 12px var(--font-mono); letter-spacing: .03em; }
+.swatchInfo span { margin-top: 5px; color: var(--muted); font: 600 11px var(--font-mono); overflow-wrap: anywhere; }
+.typePanel { display: grid; gap: 0; padding: 5px 29px; border: 4px ridge #9e91ab; background: linear-gradient(160deg, #2c1b40, #171021); box-shadow: var(--shadow-panel); }
+.typePanel > div { display: grid; grid-template-columns: 175px 1fr; align-items: center; gap: 20px; min-width: 0; padding: 22px 0; border-bottom: 1px solid var(--line); }
+.typePanel > div:last-child { border-bottom: 0; }
+.typePanel small { color: var(--violet-bright); font: 700 11px var(--font-mono); letter-spacing: .1em; }
+.typePanel p { min-width: 0; margin: 0; }
+.typeDisplay { font-size: clamp(35px, 5vw, 64px); font-weight: 900; letter-spacing: -.07em; line-height: 1.2; }
+.typeDisplay span { color: var(--signal); }
+.typeHeading { font-size: clamp(24px, 3vw, 32px); font-weight: 800; letter-spacing: -.04em; }
+.typeBody { max-width: 650px; font-size: 16px; line-height: 1.8; }
+.typeMono { color: var(--signal); font: 700 12px var(--font-mono); letter-spacing: .04em; }
+.cardPanel { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 22px; }
+.cardNotes { padding: 32px; border: 2px dashed var(--line-strong); background: #25163385; }
+.systemGrid { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 18px; align-items: stretch; }
+.systemGrid h3 { margin: 3px 0 10px; font-size: clamp(23px,2.5vw,33px); }
+.systemGrid p { margin: 0; color: #ddd1e5; font-size: 15px; line-height: 1.8; }
+.windowAction { margin-top: 25px; }
+.noteTag { color: var(--signal); font: 800 11px var(--font-mono); letter-spacing: .12em; }
+.cardNotes h3 { max-width: 410px; margin: 22px 0 12px; font-size: clamp(24px, 3vw, 36px); line-height: 1.3; }
+.cardNotes p, .cardNotes li { color: #d2c8de; font-size: 15px; line-height: 1.8; }
+.cardNotes ul { margin-top: 25px; padding-left: 22px; }
+@media (max-width: 800px) { .swatches { grid-template-columns: repeat(2, 1fr); } .cardPanel, .systemGrid { grid-template-columns: 1fr; } }
+@media (max-width: 600px) { .page { padding-top: 40px; } .intro { margin-bottom: 48px; } .intro > p:last-child { font-size: 16px; } .section { margin-top: 48px; } .swatchColor { height: 105px; } .swatchInfo { padding: 12px; } .typePanel { padding: 5px 20px; } .typePanel > div { grid-template-columns: 1fr; gap: 8px; } .cardNotes { padding: 24px; } }

@@ -1,0 +1,16 @@
+.terminal { min-width: 0; padding: 15px 19px; border: 4px ridge #8f8a9d; background: #0b0d12; box-shadow: inset 0 0 0 2px #24242f, inset 0 0 30px #9d6cc317, 4px 5px 0 #07050d; color: #e6e1eb; font: 700 12px/1.4 var(--font-mono); }
+.top { display: flex; justify-content: space-between; gap: 10px; padding-bottom: 9px; margin-bottom: 10px; border-bottom: 1px solid #746b7e; color: #c7bad1; font-size: 11px; letter-spacing: .08em; }
+.ready { color: var(--signal); white-space: nowrap; }
+.terminal p { margin: 4px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.terminal p > span:first-child { color: var(--violet-bright); margin-right: 7px; }
+.terminal b { color: var(--signal); font-weight: 700; }
+.progressLine { display: grid; grid-template-columns: auto minmax(0,1fr) auto; align-items: center; gap: 9px; margin: 14px 0 8px; color: #d6cbdc; }
+.track { height: 15px; padding: 2px; border: 1px solid #8d809d; background: #151321; overflow: hidden; }
+.track i { display: block; width: 100%; height: 100%; background: repeating-linear-gradient(90deg, var(--signal) 0 9px, transparent 9px 12px); transform-origin: left; animation: boot 1s steps(14,end) both; }
+.progressLine strong { color: var(--signal); }
+.prompt { color: var(--signal); }
+.cursor { animation: blink 1s steps(1,end) infinite; }
+.compact { padding: 13px; }
+@keyframes boot { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes blink { 50% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .track i, .cursor { animation: none; } }

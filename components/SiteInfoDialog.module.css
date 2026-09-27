@@ -1,0 +1,13 @@
+.dialog { width: min(92vw, 480px); max-height: min(90vh, 680px); padding: 5px; border: 3px solid #dedbe6; background: #a9a5b5; box-shadow: inset 2px 2px #fff, inset -2px -2px #3b3447, 14px 18px 0 #050309b5; color: #17101f; }
+.dialog::backdrop { background: #090611bf; backdrop-filter: blur(3px); }
+.titlebar { display: flex; align-items: center; gap: 7px; min-height: 32px; padding: 3px 4px 3px 7px; background: linear-gradient(90deg, #36115e, #9d6ac6); color: #fff; font: 800 12px var(--font-mono); }
+.icon { display: grid; place-items: center; width: 18px; height: 18px; background: var(--signal); color: #211629; font: 900 14px serif; }
+.titlebar button { margin-left: auto; width: 22px; height: 22px; border: 1px solid #443b50; background: #e8e4ef; box-shadow: inset 1px 1px #fff, inset -1px -1px #777080; color: #211829; cursor: pointer; font: 900 17px/1 sans-serif; }
+.body { display: grid; grid-template-columns: 70px 1fr; gap: 17px; padding: 24px 18px; }
+.symbol { display: grid; place-items: center; align-self: start; width: 64px; height: 64px; border: 2px solid #6b5d78; background: linear-gradient(145deg,#fff976,#e8dc08); box-shadow: 3px 3px #5c5262; font: 900 40px var(--font-display); }
+.symbol span { color: var(--violet); }
+.body h2 { margin: 0 0 8px; font-size: 24px; line-height: 1.2; }
+.body p { margin: 0; font-size: 15px; line-height: 1.7; }
+.body .version { margin-top: 17px; color: #4e3c5d; font: 700 11px var(--font-mono); }
+.actions { display: flex; justify-content: flex-end; padding: 0 15px 13px; }
+@media (max-width: 420px) { .body { grid-template-columns: 1fr; } .symbol { width: 50px; height: 50px; font-size: 31px; } }

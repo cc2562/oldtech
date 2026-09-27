@@ -1,0 +1,6 @@
+.demo { padding: 28px; border: 1px solid var(--line-strong); border-radius: var(--radius-md); background: linear-gradient(150deg, #322046, #1c1229 75%); box-shadow: var(--shadow-panel); }
+.controls { display: flex; flex-wrap: wrap; align-items: center; gap: 19px 17px; padding: 10px 0 24px; }
+.readout { margin: 0; padding: 15px 16px; border: 1px solid #86719870; border-radius: 8px; background: #110b1e; color: var(--paper); font-size: 14px; }
+.readout span { margin-right: 15px; color: var(--signal); font: 700 11px var(--font-mono); letter-spacing: .08em; }
+.hint { margin: 13px 0 0; color: var(--muted); font-size: 13px; }
+@media (max-width: 600px) { .demo { padding: 20px; } .controls { align-items: stretch; flex-direction: column; } .readout span { display: block; margin-bottom: 5px; } }
