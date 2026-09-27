@@ -124,18 +124,23 @@ const Posts: CollectionConfig = {
       data.slug = incomingSlug || await unusedSlug(req)
       const markdown = data.bodyMarkdown ?? originalDoc?.bodyMarkdown
       const body = data.body ?? originalDoc?.body
-      // Markdown takes priority for derived values when both are present,
-      // matching the front-end rendering priority.
-      const articleText = markdownToPlainText(markdown) || normalizeArticleText(body)
-      if (!articleText) {
+      const markdownSource = typeof markdown === 'string' ? markdown.trim() : ''
+      const richTextSource = normalizeArticleText(body)
+      if (!markdownSource && !richTextSource) {
         throw new ValidationError({
           collection: 'posts',
           errors: [{ path: 'bodyMarkdown', message: '请填写富文本正文或 Markdown 正文（至少一种）。' }],
         })
       }
+      // Markdown takes priority for derived values when both are present,
+      // matching the front-end rendering priority. Image-only or code-only
+      // bodies strip down to no prose, so the raw Markdown is the fallback.
+      const articleText = markdownToPlainText(markdownSource) || richTextSource || markdownSource
       data.readingMinutes = readingMinutesFromText(articleText)
       const currentExcerpt = data.excerpt ?? originalDoc?.excerpt
-      if (!String(currentExcerpt || '').trim()) data.excerpt = excerptFromText(articleText)
+      if (!String(currentExcerpt || '').trim()) {
+        data.excerpt = excerptFromText(markdownToPlainText(markdownSource) || richTextSource || String(data.title || ''))
+      }
       return data
     }],
     beforeChange: [({ data }) => {
@@ -147,7 +152,7 @@ const Posts: CollectionConfig = {
     { name: 'title', type: 'text', required: true, maxLength: 160 },
     { name: 'slug', type: 'text', required: true, unique: true, index: true, admin: { description: '仅小写英文字母、数字和连字符。留空保存时会自动生成一串 ID，之后可随时改成更好记的地址。', placeholder: '留空自动生成 ID' }, validate: (value: unknown) => typeof value === 'string' && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value) ? true : '使用小写英文字母、数字和连字符' },
     { name: 'excerpt', type: 'textarea', maxLength: 400, admin: { description: '可选；留空时保存文章会自动截取正文前 80 字。' } },
-    { name: 'category', type: 'select', required: true, options: ['技术', '设计', '生活'] },
+    { name: 'category', type: 'select', required: true, options: ['技术', '思想', '生活', '页面'], admin: { description: '「页面」用于独立页面（如关于、隐私政策），不会出现在首页与文章档案列表，仅可通过链接访问。' } },
     { name: 'issue', type: 'text', required: true, unique: true, maxLength: 12 },
     { name: 'featured', type: 'checkbox', defaultValue: false },
     { name: 'publishedAt', type: 'date', admin: { date: { pickerAppearance: 'dayAndTime' } } },

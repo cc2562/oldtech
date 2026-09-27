@@ -35,7 +35,7 @@ Markdown 正文与富文本正文二选一：填写后前台优先渲染 Markdow
 | 频道 | 记录 | 状态 |
 | --- | --- | --- |
 | 技术 | 02 | ONLINE |
-| 设计 | 01 | ONLINE |
+| 思想 | 01 | ONLINE |
 
 \`\`\`ts
 export function lockChannel(channel: Channel) {

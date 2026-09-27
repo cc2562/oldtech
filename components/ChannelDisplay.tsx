@@ -2,7 +2,7 @@ import { channels, type Channel } from "./ChannelKnob";
 import { useScramble } from "@/hooks/useScramble";
 import styles from "./ChannelDisplay.module.css";
 
-const codes: Record<Channel, string> = { 全部: "ALL", 技术: "TECH", 设计: "DSGN", 生活: "LIFE" };
+const codes: Record<Channel, string> = { 全部: "ALL", 技术: "TECH", 思想: "MIND", 生活: "LIFE" };
 
 /**
  * Skeuomorphic LED matrix readout for the archive control deck. Mirrors the

@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: "文章档案",
-  description: "技术、设计与生活频道的全部文章。",
+  description: "技术、思想与生活频道的全部文章。",
 };
 
 export default async function PostsPage() {

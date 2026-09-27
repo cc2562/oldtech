@@ -1,4 +1,5 @@
-export type PostCategory = "技术" | "设计" | "生活";
+/** 「页面」是独立页面（关于/隐私政策等），不出现在前台列表与频道旋钮中。 */
+export type PostCategory = "技术" | "思想" | "生活" | "页面";
 
 export interface PostSummary {
   id: string;
@@ -23,7 +24,7 @@ export const posts: PostSummary[] = [
     slug: "a-small-future-on-the-desk",
     title: "桌面上的一小块未来",
     excerpt: "从透明外壳、旋钮与状态灯出发，重新想象那些让人愿意触碰的数字界面。",
-    category: "设计",
+    category: "思想",
     publishedAt: "2026-09-18",
     readingMinutes: 6,
     issue: "001",
@@ -60,7 +61,7 @@ export const posts: PostSummary[] = [
     slug: "colors-in-the-dark",
     title: "给深色界面留一束光",
     excerpt: "试着让亮黄与紫色各司其职：前者指引操作，后者托起内容。",
-    category: "设计",
+    category: "思想",
     publishedAt: "2026-08-27",
     readingMinutes: 7,
     issue: "004",

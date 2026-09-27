@@ -52,7 +52,8 @@ export async function getPublishedPosts(options: { limit?: number } = {}): Promi
   const payload = await cms()
   const result = await payload.find({
     collection: 'posts',
-    where: { _status: { equals: 'published' } },
+    // "页面" articles are standalone pages: reachable by URL, never listed.
+    where: { and: [{ _status: { equals: 'published' } }, { category: { not_equals: '页面' } }] },
     sort: '-publishedAt',
     // `limit` keeps the home page cheap on large archives; without it every
     // published post is returned (the archive index pages through them locally).

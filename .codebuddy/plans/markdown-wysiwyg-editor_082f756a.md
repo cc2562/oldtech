@@ -30,142 +30,186 @@ todos:
       - docs-changelog
 ---
 
+
 ## 产品概述
 
-为后台文章编辑器提供 **Markdown 可视化（所见即所得）写作体验**：把当前「Markdown 正文」的纯文本输入框替换为 Vditor 即时渲染编辑器，输入 `#` 即成为标题、所见即所得，工具栏提供常用排版操作，图片可从本地选图上传到本站媒体库并自动插入 Markdown 语法，也支持直接粘贴外链图片地址。
+为博客增加 **Typecho 老站迁移能力**：读取 Typecho 后台「备份」功能导出的 `.dat` 备份文件，把其中的文章、特色图片与评论导入本站，历史文章从此可以直接在新站继续写作与维护。
 
 ## 核心功能
 
-- 「Markdown 正文」字段改为所见即所得编辑器（IR 即时渲染模式），带工具栏：标题、粗体、斜体、删除线、引用、无序/有序列表、任务列表、代码块、行内代码、链接、表格、分割线、上传图片、撤销/重做、全屏
-- 编辑内容仍以 **Markdown 纯文本**保存，字段校验、阅读时长与摘要自动计算、前台渲染优先级全部不变
-- 工具栏「上传图片」按钮选择本地图片后上传到本站媒体库，成功后自动插入 `![文件名](站内地址)`；上传失败在编辑器内以中文提示，不插入无效链接
-- 可直接粘贴或手写外链图片 `![说明](https://…)`，前台经站内懒加载组件渲染
-- 编辑器样式适配站点深紫控制台主题，不使用红色；配色仅作用于编辑器容器内，不污染后台其它区域
-- 编辑器的运行时资源（高亮主题、图标等）由本站自托管，不依赖外部 CDN，符合自托管部署方式
-- 兼容与降级：字段只读时显示只读文本；编辑器脚本加载失败时自动回退为可用的纯文本输入框，不阻断写作
+- **解析 Typecho 备份**：`.dat` 是 Typecho 自定义二进制格式（不是 XML），需按官方字节格式解析文章、评论、分类关系与自定义字段
+- **两种正文格式统一为 Markdown**：
+  - 原本就是 Markdown 的文章：剥离 Typecho 的 Markdown 标记与 `<!--more-->` 摘要标记，原样保留
+  - HTML 老文章（WordPress Gutenberg 区块）：清除 `<!-- wp:xxx -->` 注释与空段落，转换标题、段落、列表、引用、链接、加粗、表格等为 Markdown；`figure + img + figcaption` 转成「Markdown 图片 + 一行说明文字」
+  - 自动判别正文类型，无需人工挑拣；转换异常的文章在报告中列出
+- **特色图片作为封面**：读取自定义字段 `FeaturedImage` 中的图片地址，下载后上传到本站媒体库并关联为文章封面；下载失败的文章仍正常导入，仅在报告中标记
+- **正文插图保持外链**：文中图片地址不改写，继续指向原站
+- **评论导入并保留回复关系**：只导入已审核评论，`author / mail / url / 正文 / 时间` 一并迁移，父评论关系完整还原（多级回复在详情页按现有层级展示）
+- **分类与期号映射**：Typecho 分类名映射到本站「技术 / 设计 / 生活」三个频道，支持自定义映射表；期号沿用旧文章 ID 便于回溯，冲突时自动避让
+- **安全自检与预览**：提供结构探测模式（只看备份里有什么、不写数据库）与预演模式（跑完整转换、打印每篇文章与每条评论的导入结果但不落库），确认无误后再正式导入
+- **幂等可重跑**：重复执行不会产生重复文章或重复评论，中断后可再次运行继续
 
-## 使用方式（交付后）
+## 交付后的使用方式
 
-后台文章编辑页 → 在「Markdown 正文」区域直接书写：输入 `# ` 得到标题、选中文字点工具栏加粗、点「上传图片」选本地图片即自动上传并插入、也可粘贴外链图片地址 → 保存或发布。原有富文本正文与前台展示均不受影响。
+先用探测模式查看备份结构，再用预演模式核对转换结果，确认后正式导入；导入的文章直接发布并保留原始发布时间，评论按原有回复层级展示在文章详情页。整个过程在本地执行，不需要登录旧站。
+
+
 
 ## 技术栈选择
 
-沿用项目现状，仅新增一个编辑器依赖：
-
-- 框架与语言：Next.js 16.3.6 App Router、React 19.3.0、TypeScript 5.9、CSS Modules（项目约束：不使用 Tailwind）
-- 后台体系：Payload CMS 3.90.2 与 `@payloadcms/ui` 3.90.2（已随 payload 安装，提供 `useField` 值绑定）
-- 新增依赖：`vditor`（社区成熟的中文 Markdown 编辑器，支持 IR 即时渲染模式；按用户选择接受其体积代价）
-- 存储与前台：**完全不改**——仍为 `posts.bodyMarkdown` 纯文本，前台仍由 `components/MarkdownBody.tsx` 渲染
-- 资源自托管：`public/vditor`（由脚本从 `node_modules/vditor/dist` 同步），组件内 `cdn: '/vditor'`，避免依赖 jsdelivr
-- 验证：`npm run typecheck`、`npm run dev` 下的编译与静态资源检查
+- 运行环境：沿用项目现状 —— Node.js 20+、TypeScript 5.9、Payload CMS 3.90.2 local API、PostgreSQL；导入脚本沿用现有 `payload run` 执行方式（参考 `package.json` 的 `seed:drafts`）
+- 新增依赖（克制，仅两个）：`turndown`（HTML→Markdown）、`turndown-plugin-gfm`（表格/删除线/任务列表规则），开发期类型 `@types/turndown`
+- 二进制解析：Node 内置 `Buffer` + `node:crypto`（md5 校验），不引入额外解析库
+- 不涉及数据库结构变更，**不需要迁移**；`payload-types.ts` 无需重新生成
 
 ## 实现思路
 
-核心策略是**只替换字段的输入控件，不动数据与渲染链路**：Payload 支持字段级自定义组件（`admin.components.Field`），组件通过 `useField` 与表单状态双向绑定，因此 Markdown 文本仍是唯一事实来源。
+### 1. Typecho 备份的字节格式（已查证 Typecho 官方源码，非推测）
 
-1. **资源自托管（前置）**：新增 `scripts/sync-vditor-assets.mjs`，把 `node_modules/vditor/dist` 递归复制到 `public/vditor`（幂等，已存在则跳过或覆盖，耗时以秒计），接线为 `predev` 与 `prebuild` npm 脚本保证任何启动方式都先同步；`public/vditor/` 加入 `.gitignore`（数 MB 静态资源不入库，克隆后由脚本生成）。
-2. **编辑器组件**：新增 `components/admin/MarkdownEditor.tsx`（`'use client'`）。Vditor 只能在浏览器运行，故在 `useEffect` 中动态 `import('vditor')`（独立 chunk，仅后台加载），卸载时 `destroy()`；用 `useField<string>({ path })` 取 `value` 与 `setValue`，初始化用当前值，`input`/`blur` 回调里 `getValue()` 回写；用 `useEffect` 比较外部值与编辑器值，处理草稿恢复/表单重置导致的外部变更。
-3. **图片上传**：配置 Vditor 的 `upload.handler`。组装 `FormData`（`file` + `alt`，`alt` 取文件名，因为媒体库 `alt` 为必填），同源 `POST /api/media`（`credentials: 'include'`，依赖管理员 Cookie 会话），成功后取响应中的 `doc.url` 拼成 `![alt](url)`；返回 Vditor 约定的 `{ msg, code, data: { errFiles, succMap } }`。上传前按媒体库允许的类型（jpeg/png/webp/avif）预校验，非图片或超限直接进 `errFiles` 并给出中文提示，避免服务端报错信息难以理解。
-4. **降级与只读**：动态导入失败时渲染绑定同一字段的 `textarea`（带说明提示），编辑器不可用不阻断写作；`readOnly` 时直接渲染只读文本，不加载 Vditor。
-5. **字段接线与生成物**：`payload.config.ts` 的 `bodyMarkdown` 保留 label 与 description，新增 `admin.components.Field = '/components/admin/MarkdownEditor#MarkdownEditorField'`（路径相对 `importMap.baseDir` 即项目根）；执行 `npx payload generate:importmap` 刷新 `app/(payload)/admin/importMap.js` 并确认新增条目存在，否则后台会渲染不出组件。
-6. **样式适配**：引入 `vditor/dist/index.css`，再用 `components/admin/MarkdownEditor.module.css` 在编辑器容器内覆盖为站点深色配色（面板/边框/工具栏/选区/链接/代码块/表格），复用 `:root` 变量，代码高亮沿用信号黄 / EVA 紫 / 银铬且**不使用红色**（含错误提示色改为信号黄/紫）；样式一律以容器类为前缀，避免影响 Payload 后台其它区块。
+来源：`var/Widget/Backup.php`（`export()` / `extractData()` / `buildBuffer()` / `processData()` / `parseHeader()`）与 `var/Typecho/Common.php`（`buildBackupBuffer()` / `extractBackupBuffer()`）。
 
-### 关键决策与理由
+文件结构：
 
-- **选 Vditor 的 IR 模式**：用户明确选择"所见即所得（Vditor）"；IR 模式即 Typora 式即时渲染，满足"输入 `#` 就是标题"的预期。
-- **自托管而非 CDN**：Vditor 默认从 jsdelivr 按需加载高亮主题等资源；本项目为自托管部署（README 要求 Nginx + 持久化目录），外链 CDN 会在内网/断网环境导致编辑器降级或样式缺失，故随仓库外的脚本同步到 `public/`。
-- **不引入 `rehype-raw`、不放宽 HTML**：与既有前台策略一致；编辑器输出仍是 Markdown 文本，XSS 面不变。
-- **上传走 Payload REST 而非自建接口**：复用媒体库既有的类型限制、图片尺寸生成与访问控制（`access.create = adminOnly`），避免第二套上传逻辑与鉴权分支。
-- **不替换富文本编辑器**：两种正文并存是既定设计，本次只增强 Markdown 一侧，回归面最小。
+```
+[21 字节头标记] [记录块 1] [记录块 2] … [21 字节尾标记]
+```
 
-### 性能与可靠性
+- 头尾标记相同：`%TYPECHO_BACKUP_XXXX%`（`%TYPECHO_BACKUP_` 16 字符 + 4 字符版本号 + `%`），校验正则 `/%TYPECHO_BACKUP_[A-Z0-9]{4}%/`，版本号取字符串第 16–19 位
+- 记录块字节封装（`buildBackupBuffer`）：
 
-- Vditor 通过动态 `import()` 只进入后台管理端 chunk，**不影响前台公开页面的包体积与首屏**；编辑器懒加载发生在字段进入视口/挂载后。
-- 资源同步脚本为一次性文件复制，幂等；`.gitignore` 排除生成物，仓库体积不膨胀。
-- 上传为单请求串行处理多文件，失败文件单独回传 `errFiles`，不整批丢弃；请求前做类型/大小预校验，减少无效往返。
-- 边界处理：字段为空时不写入空字符串；外部值变化时同步编辑器；编辑器销毁时清空实例引用避免内存泄漏；`destroy()` 在组件卸载与热更新重挂载时都调用。
+```php
+$buffer .= pack('vvV', $type, strlen($header), strlen($body)); // 2+2+4 字节，小端
+$buffer .= $header . $body;   // header = json_encode(schema)，body = 各字段值无分隔符拼接
+$buffer .= md5($buffer);      // 32 字节十六进制
+```
+
+- 读取侧两种版本（`extractBackupBuffer`）：
+  - 版本为 `FILE`：meta **6 字节**（`unpack('v3')` → type / headerLen / bodyLen 各 2 字节小端），且 **body 长度以 schema 为准**（`array_reduce` 累加 schema 中非 null 的长度，因为正文可能超过 64KB）
+  - 其他版本：meta **8 字节**（type 2B + headerLen 2B + bodyLen 4B，小端），body 长度按 meta 读取
+  - md5 校验对象是 `meta + header + body`
+- schema 为 JSON 对象：键=字段名、值=该字段字节长度（`null` 表示 NULL）；按 schema 的键顺序用 `substr` 依次切片还原记录
+- **类型 ID**：`1=contents`、`2=comments`、`3=metas`、`4=relationships`、`5=users`、`6=fields`；其他 ID 交由插件处理，本工具忽略并提示
+- 各表字段顺序（即 schema 顺序，来源 `applyFields()`）：`contents: cid,title,slug,created,modified,text,order,authorId,template,type,status,password,commentsNum,allowComment,allowPing,allowFeed,parent`；`comments: coid,cid,created,author,authorId,ownerId,mail,url,ip,agent,text,type,status,parent`；`metas: mid,name,slug,type,description,count,order,parent`；`relationships: cid,mid`；`fields: cid,name,type,str_value,int_value,float_value`
+- 时间字段即普通字段：`contents.created/modified`、`comments.created`，单位 Unix 秒
+
+### 2. 导入映射
+
+| Typecho | 本站字段 | 处理方式 |
+| --- | --- | --- |
+| `contents.title` | `posts.title` | 直接使用 |
+| `contents.slug` | `posts.slug` | 清洗为小写字母/数字/连字符；为空或清洗后为空则留空，交由现有自动 slug 钩子生成；冲突时回退为空（自动生成） |
+| `contents.text` | `posts.bodyMarkdown` | Markdown 原样 / HTML 转 Markdown（见下） |
+| `contents.created` | `posts.publishedAt` | Unix 秒 → ISO 字符串 |
+| `contents.cid` | `posts.issue` | 零填充到至少 3 位（如 `042`）；与站内已有期号冲突时追加字母后缀并在报告中说明 |
+| 分类关系 | `posts.category` | `relationships` + `metas(type=category)` 取分类名，经映射表落到 技术/设计/生活，未匹配归入默认频道 |
+| `fields[FeaturedImage].str_value` | `posts.cover` | 下载 → 写入媒体库（`alt` 取文件名）→ 关联；失败则跳过封面并记录 |
+| `comments.cid` | `comments.post` | 通过文章映射查找 |
+| `comments.parent` | `comments.parent` | 两遍写入：先建全部评论得到 `coid → id` 映射，再回填父评论 |
+| `comments.author / mail / url / text / created` | `comments.author / email / site / text / createdAt` | `author` 截断至 24 字符；`site` 仅接受 http/https；`text` 清洗 HTML 实体与标签、超 2000 字符截断并记录；尝试保留原始 `createdAt` |
+| `comments.status` | 过滤 | 仅 `approved` 导入（用户选择） |
+
+正文处理细节：
+
+- 强信号：正文以 Typecho 的 Markdown 标记开头（`<!--markdown-->`）→ 直接按 Markdown 处理并剥离该标记
+- 无标记时按启发式判别：出现 `<p`、`<h1-6`、`<figure`、`<img`、`wp:` 注释等 HTML 特征 → 走 HTML 转换；否则按 Markdown 处理
+- HTML 转换：先剔除 `<!-- wp:* -->` 与 `<!-- /wp:* -->` 注释、空 `<p></p>`，交给 turndown + GFM 规则；自定义规则把 `<figure>` 转成 `![alt 或 caption](src)` 加一行斜体说明，并去掉残留的 `wp-*` class 影响
+- 统一清理正文开头/结尾的 `<!--more-->`、多余空行；转换失败（抛错或结果为空但原文有内容）的文章记录到报告并保留原始 HTML 片段供人工处理
+
+### 3. 关键决策与理由
+
+- **直接解析 `.dat` 而不是让用户导出 SQL**：用户已确认手上就是 `.dat`，且格式简单（定长 meta + 长度 schema + md5），无需引入数据库依赖
+- **统一转 Markdown 而不是放行 HTML**：前台 MarkdownBody 刻意不放行原始 HTML（未启用 rehype-raw），转换方案能保持统一的阅读样式与安全边界；代价是 class/内联样式丢失，已与用户确认
+- **只下载特色图片**：用户选择；正文插图保持外链可让首次迁移快速完成，且不会把旧站的全部图片都拖过来
+- **只导入 `type=post` 且 `status=publish` 的文章**：页面（page）、附件、草稿、私密文章不进入新站，分类与数量在报告中列出，避免误发布
+- **两遍写入评论**：父评论必须先存在才能建立关系，因此先建全部评论再回填 parent，避免深层回复丢链
+- **不做事务性回滚**：Payload local API 不提供跨记录事务；改用幂等设计（按 slug / `(post, author, 正文前缀)` 查重跳过），中断后重跑即可续上
+- **`--selftest` 自检**：内置一个按同样字节格式的编码器，现场合成包含两种版本 meta 的迷你备份，解析回来后逐字段断言——这样即使还没有真实备份文件，也能验证解析器正确
+
+### 4. 性能与可靠性
+
+- 备份文件为全量内存解析：数百篇文章 + 数千评论量级下（文件通常几 MB）耗时以毫秒计，无需流式处理
+- 去重查询批量进行：一次 `payload.find({ where: { slug: { in: [...] } } })` 取回已有 slug，避免逐篇查询的 N+1
+- 图片下载串行并带超时与大小上限（默认 15MB 拒绝超大文件），失败即跳过，不阻塞整体导入
+- 长事务风险规避：逐篇创建，每篇完成后输出进度日志（`payload.logger`），中断可续跑
+- 安全：只读备份文件、只写本站数据库；不修改或删除已有内容；`overrideAccess: true` 仅用于脚本内部写入，脚本不进入 Web 运行路径
 
 ## 架构设计
 
-维持既有分层，仅替换后台字段的展示/输入组件，数据流与前台渲染链路不变：
-
 ```mermaid
 flowchart LR
-  A[后台文章编辑页<br/>Markdown 正文字段] --> B[MarkdownEditorField<br/>components/admin/MarkdownEditor.tsx]
-  B --> C[useField 双向绑定<br/>@payloadcms/ui]
-  B --> D[Vditor IR 所见即所得<br/>资源来自 public/vditor]
-  D --> E[上传图片按钮]
-  E --> F[POST /api/media<br/>媒体库]
-  F --> D
-  C --> G[(posts.body_markdown<br/>Markdown 纯文本)]
-  G --> H[前台 MarkdownBody 渲染<br/>不变]
+  A[Typecho .dat 备份] --> B[lib/typecho/dat.ts<br/>字节解析 + md5 校验]
+  B --> C[contents / comments / metas<br/>relationships / fields]
+  C --> D[lib/typecho/transform.ts<br/>正文转换 · 分类映射 · 字段归一]
+  D --> E[scripts/import-typecho.ts]
+  E -- 探测/预演 --> F[report 控制台输出]
+  E -- 正式导入 --> G[媒体库<br/>下载 FeaturedImage]
+  E -- 正式导入 --> H[(posts<br/>直接发布 + 原发布时间)]
+  E -- 两遍写入 --> I[(comments<br/>approved + parent 关系)]
 ```
-
-## 实现注意
-
-- 必须先执行资源同步脚本，否则编辑器会尝试从外部 CDN 取资源或缺失样式；`predev`/`prebuild` 接线用于自动化这一步。
-- 字段组件路径与导出名必须与 importMap 一致（`/components/admin/MarkdownEditor#MarkdownEditorField`），改完务必重新生成 importMap 并确认 `app/(payload)/admin/importMap.js` 中出现该条目。
-- Vditor 实例必须在卸载时 `destroy()`；React 严格模式下 `useEffect` 会执行两次，需在清理函数中避免重复初始化导致的 DOM 残留。
-- 与 Payload 表单的同步要防抖（编辑器 `input` 事件高频），避免每次按键都触发整个表单校验；`blur` 时再确保一次同步。
-- 若 webpack 解析 `vditor` 构图报错，兜底方案是在 `next.config.ts` 增加 `transpilePackages: ['vditor']`；先不加，按实际情况处理。
-- 不改动 `bodyMarkdown` 的字段类型（仍是 textarea → varchar）、校验逻辑与前台渲染分支，因此**不需要数据库迁移**。
-- 完成后按项目惯例更新 `changlog.md`（顶部追加）与 README 的后台写作说明，并运行 `npm run typecheck`（用户此前取消过 `npm run build`，不主动运行）。
 
 ## 目录结构
 
 ```
 oldtech/
-├── package.json                                    # [MODIFY] 新增依赖 vditor；新增 predev/prebuild 脚本调用资源同步脚本
-├── .gitignore                                      # [MODIFY] 新增 public/vditor/（生成物，不入库）
+├── package.json                                    # [MODIFY] 新增依赖 turndown / turndown-plugin-gfm（devDep 加 @types/turndown）；新增脚本 "import:typecho": "payload run scripts/import-typecho.ts"
+├── lib/typecho/
+│   ├── dat.ts                                      # [NEW] Typecho 备份解析器：校验 21 字节头尾标记与版本号；按版本读取 6 字节(FILE) 或 8 字节 meta；按 schema 长度切片还原记录；md5 校验；按类型 ID 1–6 分组输出；导出 parseBackup(buffer) 与仅用于自检的 encodeBackup(rows)
+│   └── transform.ts                                # [NEW] 转换层：Gutenberg 注释与空段落清理、figure/figcaption → Markdown 图片+说明、Markdown/HTML 自动判别、<!--markdown--> 与 <!--more--> 处理、分类名 → 频道映射（含关键词表与自定义映射）、出题号/slug/日期归一、评论文本清洗与截断、封面 URL 提取
 ├── scripts/
-│   └── sync-vditor-assets.mjs                      # [NEW] 将 node_modules/vditor/dist 同步到 public/vditor，幂等且带日志输出；供 predev/prebuild 调用
-├── components/admin/
-│   ├── MarkdownEditor.tsx                          # [NEW] 'use client' 字段组件：导出 MarkdownEditorField；动态 import vditor，IR 模式与暗色主题；useField 双向绑定（初始化值、input/blur 回写、外部值变化同步）；upload.handler 上传到 /api/media 并回填 ![](站内地址)；动态导入失败回退 textarea；readOnly 渲染只读文本；卸载 destroy()
-│   └── MarkdownEditor.module.css                   # [NEW] 容器作用域下的深色控制台样式覆盖（面板/边框/工具栏/选区/链接/代码高亮/表格），复用 :root 变量，不使用红色
-├── payload.config.ts                               # [MODIFY] bodyMarkdown 字段 admin.components.Field 指向自定义组件，保留 label 与 description
-├── app/(payload)/admin/importMap.js                # [MODIFY] 由 npx payload generate:importmap 生成，新增自定义字段组件映射
-├── public/vditor/                                  # [NEW] 自托管编辑器资源（脚本生成，git 忽略）
-├── README.md                                       # [MODIFY] 补充后台 Markdown 可视化编辑说明、资源同步脚本与新依赖
-└── changlog.md                                     # [MODIFY] 顶部追加条目：Markdown 字段升级为所见即所得、图片上传到媒体库、资源自托管与降级策略
+│   └── import-typecho.ts                           # [NEW] CLI 主流程：--file / --inspect / --dry-run / --selftest / --category-map / --default-category；读取并解析备份；幂等查重；封面下载写入媒体库；文章发布写入；评论两遍写入保留 parent；尝试保留原始时间；输出统计报告（成功/跳过/失败清单与原因）
+├── README.md                                       # [MODIFY] 新增「从 Typecho 迁移」章节：命令用法、三阶段（探测→预演→导入）、分类映射表配置、图片与评论策略、可重复执行说明
+└── changlog.md                                     # [MODIFY] 顶部追加条目：Typecho .dat 导入能力、HTML→Markdown 转换、特色图片迁移、评论层级保留
 ```
 
 ## 关键代码结构
 
-字段接线（`payload.config.ts`）：
+解析器对外接口（`lib/typecho/dat.ts`）：
 
 ```ts
-{
-  name: 'bodyMarkdown',
-  label: 'Markdown 正文',
-  type: 'textarea',
-  admin: {
-    description: '与富文本正文二选一；填写后前台优先渲染 Markdown。',
-    components: { Field: '/components/admin/MarkdownEditor#MarkdownEditorField' },
-  },
+export type BackupRow = Record<string, string | null>
+
+export type ParsedBackup = {
+  /** 头部 4 字符版本号，新版为 'FILE' */
+  version: string
+  contents: BackupRow[]
+  comments: BackupRow[]
+  metas: BackupRow[]
+  relationships: BackupRow[]
+  fields: BackupRow[]
+  /** 非 1–6 的类型 ID（插件数据），仅提示不处理 */
+  unsupportedTypes: number[]
 }
+
+/** 解析备份字节流；头尾标记、记录 md5 或长度不一致时抛出带上下文的错误 */
+export function parseBackup(buffer: Buffer): ParsedBackup
+
+/** 仅用于 --selftest：按同一字节格式合成备份，便于无真实文件时验证解析器 */
+export function encodeBackup(records: { type: number; row: BackupRow }[], version?: string): Buffer
 ```
 
-上传处理器返回约定（`components/admin/MarkdownEditor.tsx`，Vditor 要求的形态）：
+## 实现注意
 
-```ts
-type VditorUploadResult = {
-  msg: string;
-  code: 0 | 1;
-  data: { errFiles: string[]; succMap: Record<string, string> };
-};
-// succMap 的 value 为 /api/media 响应中的 doc.url，用于生成 ![alt](url)
-```
+- 必须按 schema 的键顺序切片，且 schema 值为 `null` 时该字段为 NULL 并跳过长度累加（`FILE` 版本的 body 长度完全依赖此累加，算错会导致后续记录全部错位）
+- `FILE` 版本 meta 的 bodyLen 只有 2 字节，**不可作为真实长度使用**，一律以 schema 累加值为准
+- 头尾标记一致性与每条记录的 md5 必须校验；失败时报出记录序号与类型，便于定位损坏文件
+- 期号唯一约束会与站内已有的演示文章期号冲突，必须做「取不到就换一个」的避让而不是直接失败
+- 正文为空、既有正文又无 Markdown 的文章会被 `beforeValidate` 钩子拒绝（「至少一种正文」），需要在导入前过滤并记录，不能让脚本中途崩溃
+- 评论 `author` 超过 24 字符、`text` 超过 2000 字符、`site` 非 http/https 都会被集合校验拦截，导入前统一清洗
+- 不导入 Typecho 用户表与密码；`overrideAccess: true` 只出现在脚本写入路径
+- `payload run` 是否透传命令行参数需在实现时实测；若不透传，则支持从环境变量 `TYPECHO_BACKUP` / `TYPECHO_CATEGORY_MAP` 读取，README 同时写明两种用法
+- 完成后运行 `npm run typecheck`（用户此前取消过 `npm run build`，不主动运行），更新 README 与 `changlog.md`
+
 
 ## Agent Extensions
-
-### Skill
-
-- **playwright-cli**
-- Purpose: 在实现完成后驱动浏览器验证后台可用性——打开 `/admin` 与文章编辑页，确认自定义字段组件被正确加载、Vditor 资源（`/vditor/dist/index.css` 等）返回 200、编辑器容器渲染为深色主题且无控制台报错；并截取不同宽度（桌面 / 窄屏）的截图核对工具栏折行与无横向溢出。
-- Expected outcome: 得到可核对的截图与控制台/网络检查结论，确认后台未出现编译或运行时错误、资源自托管生效；登录后的实际输入与上传行为交由用户实测（环境内无管理员凭据）。
 
 ### SubAgent
 
 - **code-explorer**
-- Purpose: 在动手前快速核对三个改动点的现状——`bodyMarkdown` 字段定义与 `admin` 配置（`payload.config.ts`）、`app/(payload)/admin/importMap.js` 的条目格式、以及 `package.json` 现有脚本与 `next.config.ts` 配置，确保字段路径、导出名与脚本接线方式与现有约定一致。
-- Expected outcome: 输出字段与生成物的精确位置与格式结论，使 `components.Field` 路径、importMap 重新生成步骤和 npm 脚本接线一次到位，避免后台渲染不出组件。
+  - Purpose: 在动手写转换层前核对评论在前台的渲染方式与字段用法——`components/EchoBoard.tsx` 如何展示评论正文（纯文本还是 Markdown、是否保留换行）、详情页与 `lib/cms.ts` 如何使用 `site`、`parent`、`createdAt`；顺带确认 `posts` 集合对 `issue` 唯一性、`category` 取值与 `cover` 关联的确切约束
+  - Expected outcome: 输出评论字段的精确清洗要求（换行/HTML 实体/长度）与分类、期号、封面的写入约束清单，使导入映射一次到位，避免导入后评论显示为一行或校验被拒
+
+### Skill
+
+- **playwright-cli**
+  - Purpose: 真实备份导入完成后做浏览器抽查——打开导入的 Markdown 文章与 HTML 转换文章，确认标题层级、引用、列表、代码高亮、外链图片与封面正常渲染，且转换后的正文没有原始 HTML 标签泄漏；同时查看详情页评论区的多级回复层级是否正确展示，并截取桌面与窄屏截图
+  - Expected outcome: 得到可核对的截图与渲染结论，确认迁移结果在真实页面上可用、回复关系无丢失、无横向溢出

@@ -11,6 +11,7 @@
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "seed:drafts": "payload run scripts/seed.ts",
+    "import:typecho": "tsx scripts/import-typecho.ts",
     "db:migrate": "payload migrate"
   },
   "dependencies": {
@@ -26,12 +27,16 @@
     "rehype-highlight": "^7.0.2",
     "remark-gfm": "^4.0.1",
     "sharp": "^0.35.4",
+    "turndown": "^7.2.4",
+    "turndown-plugin-gfm": "^1.0.2",
     "vditor": "^4.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "@types/turndown": "^5.0.6",
+    "tsx": "^4.22.4",
     "typescript": "^5.9.0"
   }
 }

@@ -205,7 +205,10 @@ export interface Post {
    * 可选；留空时保存文章会自动截取正文前 80 字。
    */
   excerpt?: string | null;
-  category: '技术' | '设计' | '生活';
+  /**
+   * 「页面」用于独立页面（如关于、隐私政策），不会出现在首页与文章档案列表，仅可通过链接访问。
+   */
+  category: '技术' | '思想' | '生活' | '页面';
   issue: string;
   featured?: boolean | null;
   publishedAt?: string | null;

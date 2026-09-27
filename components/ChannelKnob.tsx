@@ -4,9 +4,10 @@ import { useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
 import type { PostCategory } from "@/lib/posts";
 import styles from "./ChannelKnob.module.css";
 
-export type Channel = "全部" | PostCategory;
+/** The knob only exposes public channels — the "页面" category stays out of it. */
+export type Channel = "全部" | Exclude<PostCategory, "页面">;
 
-export const channels: Channel[] = ["全部", "技术", "设计", "生活"];
+export const channels: Channel[] = ["全部", "技术", "思想", "生活"];
 const angles = [-45, 45, 135, -135];
 
 function angularDistance(a: number, b: number) {
