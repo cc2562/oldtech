@@ -35,9 +35,9 @@ export function PostsArchive({ posts }: { posts: PostSummary[] }) {
   return (
     <div className={styles.page}>
       <header className={styles.head}>
-        <p className={styles.panelCode}>ARCHIVE.SYS // PANEL 02 · DEMO DATA</p>
+        <p className={styles.panelCode}>ARCHIVE.SYS // PANEL 02</p>
         <h1 className={styles.title}>文章档案<span>ARCHIVE</span></h1>
-        <p className={styles.sub}>ALL SIGNALS · {String(posts.length).padStart(2, "0")} RECORDS · 文章为演示内容</p>
+        <p className={styles.sub}>ALL SIGNALS · {String(posts.length).padStart(2, "0")} RECORDS</p>
       </header>
 
       <RetroWindow title="CHANNEL_CTRL.EXE" eyebrow="ARCHIVE FILTER / CLICK · DRAG · ARROW KEYS" className={styles.ctrlWindow}>
@@ -47,7 +47,7 @@ export function PostsArchive({ posts }: { posts: PostSummary[] }) {
         </div>
         <QueryTerminal
           lines={scriptFor(channel, HYDRATE)}
-          result={`${String(visiblePosts.length).padStart(2, "0")} records · DEMO DATA`}
+          result={`${String(visiblePosts.length).padStart(2, "0")} records`}
           onComplete={() => setReady(true)}
         />
       </RetroWindow>

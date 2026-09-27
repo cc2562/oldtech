@@ -34,6 +34,7 @@
   color: #211a2b;
   font: normal 800 14px/1 sans-serif;
 }
+.controls .min::before { content: ""; width: 7px; height: 2px; background: currentColor; }
 
 /* Tab strip */
 .tabs {

@@ -8,7 +8,7 @@ export function LinkBrowser({ links }: { links: FriendLink[] }) {
       <div className={`${styles.titlebar} win-titlebar`}>
         <span className={styles.icon} aria-hidden="true">✦</span>
         <span className={styles.title}>FRIEND_LINKS.EXE // RELAY BROWSER</span>
-        <span className={styles.controls} aria-hidden="true"><i>_</i><i>□</i><i>×</i></span>
+        <span className={styles.controls} aria-hidden="true"><i className={styles.min} /><i>□</i><i>×</i></span>
       </div>
 
       <div className={styles.tabs}>
@@ -30,7 +30,6 @@ export function LinkBrowser({ links }: { links: FriendLink[] }) {
         <span className={styles.address} role="text" title="http://neon-notes.local/links">
           <span className={styles.addressScheme}>http://</span>neon-notes.local/links
         </span>
-        <span className={styles.demoTag}>DEMO</span>
       </div>
 
       <div className={styles.viewport}>
@@ -49,7 +48,7 @@ export function LinkBrowser({ links }: { links: FriendLink[] }) {
 
       <div className={styles.statusbar}>
         <span><i className={styles.statusLamp} aria-hidden="true" />READY</span>
-        <span>{links.length} LINKS CACHED · 全部标注为演示数据</span>
+        <span>{links.length} LINKS INDEXED</span>
       </div>
     </div>
   );

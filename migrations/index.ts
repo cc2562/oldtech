@@ -1,0 +1,21 @@
+import * as migration_20260927_123104_initial_blog from './20260927_123104_initial_blog';
+import * as migration_20260927_131835_add_profile_avatar from './20260927_131835_add_profile_avatar';
+import * as migration_20260927_132459_add_comment_replies from './20260927_132459_add_comment_replies';
+
+export const migrations = [
+  {
+    up: migration_20260927_123104_initial_blog.up,
+    down: migration_20260927_123104_initial_blog.down,
+    name: '20260927_123104_initial_blog',
+  },
+  {
+    up: migration_20260927_131835_add_profile_avatar.up,
+    down: migration_20260927_131835_add_profile_avatar.down,
+    name: '20260927_131835_add_profile_avatar',
+  },
+  {
+    up: migration_20260927_132459_add_comment_replies.up,
+    down: migration_20260927_132459_add_comment_replies.down,
+    name: '20260927_132459_add_comment_replies'
+  },
+];

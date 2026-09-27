@@ -18,10 +18,10 @@
   box-shadow: 0 12px 34px #050308a6, inset 1px 1px 0 #ffffff2e;
   clip-path: polygon(0 12px, 12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
 }
-.brand { display: inline-flex; align-items: center; gap: 11px; flex-shrink: 0; }
+.brand { display: inline-flex; align-items: center; gap: 11px; flex-shrink: 1; min-width: 0; }
 .mark { width: 43px; height: 43px; display: grid; place-items: center; border: 2px solid #fffbb0; background: linear-gradient(160deg,#fff675,#e6d709); color: #171120; box-shadow: 3px 3px 0 #544d00, inset 1px 1px #fff; font: 900 27px/1 var(--font-display); letter-spacing: -.1em; clip-path: polygon(0 0,86% 0,100% 14%,100% 100%,0 100%); }
 .mark span { color: var(--violet); }
-.wordmark { color: var(--paper); font: 900 18px/1 var(--font-display); letter-spacing: .025em; white-space: nowrap; text-shadow: 2px 2px #50345f; }
+.wordmark { color: var(--paper); font: 900 18px/1 var(--font-display); letter-spacing: .025em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; text-shadow: 2px 2px #50345f; }
 .wordmark span { color: var(--signal); margin: 0 2px; }
 .nav { display: flex; align-items: stretch; gap: 3px; padding: 4px; border: 2px ridge #a09aaa; background: linear-gradient(180deg,#c7c3ce,#777181); box-shadow: 3px 3px 0 #0a0710; }
 .nav a { display: flex; align-items: center; gap: 6px; min-height: 30px; padding: 5px 13px; border: 1px solid #37303f; background: #211728; color: #d4cadb; font-size: 13px; font-weight: 800; white-space: nowrap; transition: background-color .15s, color .15s; }

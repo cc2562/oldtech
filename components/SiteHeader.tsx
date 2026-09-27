@@ -4,14 +4,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import styles from "./SiteHeader.module.css";
 
-export function SiteHeader() {
+export function SiteHeader({ name }: { name: string }) {
   const pathname = usePathname();
 
   return (
     <header className={styles.header}>
-      <Link href="/" className={styles.brand} aria-label="NEON / NOTES 首页">
+      <Link href="/" className={styles.brand} aria-label={`${name} 首页`}>
         <span className={styles.mark} aria-hidden="true">N<span>·</span></span>
-        <span className={styles.wordmark}>NEON<span>/</span>NOTES</span>
+        <span className={styles.wordmark}>{name}</span>
       </Link>
       <nav className={styles.nav} aria-label="主导航">
         <Link href="/" aria-current={pathname === "/" ? "page" : undefined}>首页 <span>01</span></Link>

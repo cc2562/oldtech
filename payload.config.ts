@@ -1,0 +1,185 @@
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { postgresAdapter } from '@payloadcms/db-postgres'
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import { buildConfig, type CollectionConfig, type GlobalConfig } from 'payload'
+import sharp from 'sharp'
+
+const here = path.dirname(fileURLToPath(import.meta.url))
+const adminOnly = ({ req }: { req: { user?: unknown } }) => Boolean(req.user)
+
+const optionalWebURL = (value: unknown) => {
+  if (value === undefined || value === null || value === '') return true
+  try { return ['http:', 'https:'].includes(new URL(String(value)).protocol) || '只允许 HTTP(S) 地址' }
+  catch { return '请输入有效网址' }
+}
+
+function richTextToPlainText(value: unknown): string {
+  if (!value || typeof value !== 'object') return ''
+  if (Array.isArray(value)) return value.map(richTextToPlainText).filter(Boolean).join(' ')
+
+  const node = value as Record<string, unknown>
+  const ownText = typeof node.text === 'string' ? node.text : ''
+  const childText = richTextToPlainText(node.children)
+  const rootText = richTextToPlainText(node.root)
+  return [ownText, childText, rootText].filter(Boolean).join(' ')
+}
+
+function normalizeArticleText(value: unknown) {
+  return richTextToPlainText(value).replace(/\s+/g, ' ').trim()
+}
+
+function excerptFromText(text: string) {
+  const characters = Array.from(text)
+  return `${characters.slice(0, 80).join('')}${characters.length > 80 ? '…' : ''}`
+}
+
+function readingMinutesFromText(text: string) {
+  const cjkCharacters = (text.match(/[\u3400-\u9fff\uf900-\ufaff]/g) || []).length
+  const latinWords = (text.replace(/[\u3400-\u9fff\uf900-\ufaff]/g, ' ').match(/[\p{L}\p{N}]+/gu) || []).length
+  return Math.max(1, Math.ceil(cjkCharacters / 300 + latinWords / 200))
+}
+
+const Users: CollectionConfig = {
+  slug: 'users',
+  auth: true,
+  admin: { useAsTitle: 'email' },
+  access: { read: adminOnly, create: adminOnly, update: adminOnly, delete: adminOnly },
+  fields: [],
+}
+
+const Media: CollectionConfig = {
+  slug: 'media',
+  access: { read: () => true, create: adminOnly, update: adminOnly, delete: adminOnly },
+  upload: {
+    staticDir: process.env.MEDIA_DIR || path.join(here, 'media'),
+    mimeTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/avif'],
+    imageSizes: [{ name: 'card', width: 720 }, { name: 'hero', width: 1440 }],
+  },
+  fields: [{ name: 'alt', type: 'text', required: true, maxLength: 200 }],
+}
+
+const Posts: CollectionConfig = {
+  slug: 'posts',
+  admin: {
+    useAsTitle: 'title',
+    defaultColumns: ['title', 'slug', 'category', '_status', 'updatedAt'],
+    preview: (doc) => {
+      if (!doc.slug || !process.env.PREVIEW_SECRET) return null
+      return `/preview?${new URLSearchParams({ slug: String(doc.slug), secret: process.env.PREVIEW_SECRET })}`
+    },
+  },
+  versions: { drafts: true },
+  access: {
+    read: ({ req }) => req.user ? true : { _status: { equals: 'published' } },
+    create: adminOnly, update: adminOnly, delete: adminOnly,
+  },
+  hooks: {
+    beforeValidate: [({ data, originalDoc }) => {
+      if (!data) return data
+      const body = data.body ?? originalDoc?.body
+      const articleText = normalizeArticleText(body)
+      data.readingMinutes = readingMinutesFromText(articleText)
+      const currentExcerpt = data.excerpt ?? originalDoc?.excerpt
+      if (!String(currentExcerpt || '').trim()) data.excerpt = excerptFromText(articleText)
+      return data
+    }],
+    beforeChange: [({ data }) => {
+      if (data._status === 'published' && !data.publishedAt) data.publishedAt = new Date().toISOString()
+      return data
+    }],
+  },
+  fields: [
+    { name: 'title', type: 'text', required: true, maxLength: 160 },
+    { name: 'slug', type: 'text', required: true, unique: true, index: true, validate: (value: unknown) => typeof value === 'string' && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value) ? true : '使用小写英文字母、数字和连字符' },
+    { name: 'excerpt', type: 'textarea', maxLength: 400, admin: { description: '可选；留空时保存文章会自动截取正文前 80 字。' } },
+    { name: 'category', type: 'select', required: true, options: ['技术', '设计', '生活'] },
+    { name: 'issue', type: 'text', required: true, unique: true, maxLength: 12 },
+    { name: 'featured', type: 'checkbox', defaultValue: false },
+    { name: 'publishedAt', type: 'date', admin: { date: { pickerAppearance: 'dayAndTime' } } },
+    { name: 'readingMinutes', type: 'number', required: true, min: 1, max: 999, admin: { readOnly: true, description: '根据正文长度自动计算。' } },
+    { name: 'cover', type: 'upload', relationTo: 'media' },
+    { name: 'body', type: 'richText', required: true },
+    { name: 'pullQuote', type: 'textarea' },
+  ],
+}
+
+const FriendLinks: CollectionConfig = {
+  slug: 'friend-links',
+  labels: { singular: '友情链接', plural: '友情链接' },
+  admin: { useAsTitle: 'name', group: '内容管理' },
+  access: {
+    read: ({ req }) => req.user ? true : { status: { equals: 'published' } },
+    create: adminOnly, update: adminOnly, delete: adminOnly,
+  },
+  fields: [
+    { name: 'name', label: '站点名称', type: 'text', required: true },
+    { name: 'description', label: '站点描述', type: 'textarea', required: true },
+    { name: 'url', label: '站点链接', type: 'text', required: true, validate: optionalWebURL },
+    { name: 'icon', label: '图标图片 URL', type: 'text', maxLength: 1000, admin: { description: '可选，支持外部 HTTP(S) 图片；留空、旧版文字图标或加载失败时显示站点名称的第一个字。' } },
+    { name: 'issue', label: '编号', type: 'text', required: true },
+    { name: 'status', label: '公开状态', type: 'select', required: true, defaultValue: 'draft', options: [{ label: '草稿', value: 'draft' }, { label: '公开', value: 'published' }] },
+  ],
+}
+
+const Comments: CollectionConfig = {
+  slug: 'comments',
+  labels: { singular: '评论', plural: '评论' },
+  admin: { useAsTitle: 'author', group: '内容管理', defaultColumns: ['author', 'post', 'parent', 'status', 'createdAt'] },
+  access: {
+    read: ({ req }) => req.user ? true : { status: { equals: 'approved' } },
+    create: adminOnly, update: adminOnly, delete: adminOnly,
+  },
+  fields: [
+    { name: 'post', type: 'relationship', relationTo: 'posts', required: true, index: true },
+    { name: 'parent', label: '回复对象', type: 'relationship', relationTo: 'comments', index: true, admin: { description: '为空时是顶层评论；访客回复时自动关联。' } },
+    { name: 'author', type: 'text', required: true, maxLength: 24 },
+    { name: 'text', type: 'textarea', required: true, maxLength: 2000 },
+    { name: 'email', type: 'email', access: { read: adminOnly } },
+    { name: 'site', type: 'text' },
+    { name: 'ipHash', type: 'text', admin: { hidden: true }, access: { read: adminOnly, create: () => false, update: () => false } },
+    { name: 'status', type: 'select', required: true, defaultValue: 'pending', options: ['pending', 'approved', 'rejected'], access: { create: adminOnly, update: adminOnly } },
+  ],
+}
+
+const SiteSettings: GlobalConfig = {
+  slug: 'site-settings',
+  label: '站点资料与站长档案',
+  admin: { group: '站点管理' },
+  access: { read: () => true, update: adminOnly },
+  fields: [
+    { type: 'tabs', tabs: [
+      { label: '站点资料', fields: [
+        { name: 'name', label: '站点名称', type: 'text', required: true, defaultValue: 'NEON / NOTES' },
+        { name: 'description', label: '站点描述', type: 'textarea', required: true, defaultValue: '关于技术、设计与日常生活的个人记录。' },
+      ] },
+      { label: '站长档案', fields: [
+        { name: 'author', label: '站长名称', type: 'text', required: true, defaultValue: '站长' },
+        { name: 'bio', label: '站长简介', type: 'textarea', admin: { description: '显示在友情链接页的“站长档案”中；留空时使用站点描述。' } },
+        { name: 'avatar', label: '站长头像', type: 'upload', relationTo: 'media', admin: { description: '从媒体库选择或上传；留空时显示站长名称的第一个字。' } },
+        { name: 'socialLinks', label: '社交链接', type: 'array', labels: { singular: '社交链接', plural: '社交链接' }, fields: [
+          { name: 'label', label: '平台名称', type: 'text', required: true },
+          { name: 'handle', label: '账号或说明', type: 'text', required: true },
+          { name: 'url', label: '链接', type: 'text', required: true, validate: (value: unknown) => {
+            try { return ['http:', 'https:', 'mailto:'].includes(new URL(String(value)).protocol) || '只允许 HTTP(S) 或邮件地址' }
+            catch { return '请输入有效链接' }
+          } },
+        ] },
+      ] },
+      { label: '评论设置', fields: [
+        { name: 'requireCommentApproval', label: '新评论需要审核', type: 'checkbox', defaultValue: true },
+      ] },
+    ] },
+  ],
+}
+
+export default buildConfig({
+  admin: { user: Users.slug, importMap: { baseDir: here } },
+  collections: [Users, Media, Posts, FriendLinks, Comments],
+  globals: [SiteSettings],
+  editor: lexicalEditor(),
+  secret: process.env.PAYLOAD_SECRET || '',
+  db: postgresAdapter({ pool: { connectionString: process.env.DATABASE_URL || '' }, push: false }),
+  sharp,
+  typescript: { outputFile: path.join(here, 'payload-types.ts') },
+})

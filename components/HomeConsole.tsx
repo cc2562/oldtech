@@ -11,9 +11,10 @@ import { RetroWindow } from "./RetroWindow";
 import { SiteInfoDialog } from "./SiteInfoDialog";
 import { TerminalStatus } from "./TerminalStatus";
 import type { PostSummary } from "@/lib/posts";
+import type { SiteData } from '@/lib/cms';
 import styles from "./HomeConsole.module.css";
 
-export function HomeConsole({ posts, author }: { posts: PostSummary[]; author: string }) {
+export function HomeConsole({ posts, author, site }: { posts: PostSummary[]; author: string; site: SiteData }) {
   const [channel, setChannel] = useState<Channel>("全部");
   // Returning from an article (client-side nav) skips the query animation:
   // if this channel's script already played, cards are visible immediately.
@@ -39,14 +40,14 @@ export function HomeConsole({ posts, author }: { posts: PostSummary[]; author: s
               <p className={styles.kicker}><span>●</span> ONLINE — PERSONAL ARCHIVE</p>
               <div className={styles.chromePlate}><span className={styles.plateCode}>NN / 001</span><h1 id="intro-title">记录当下，<br /><em>想象下一种未来。</em></h1><span className={styles.plateEdge} aria-hidden="true">✦</span></div>
               <p className={styles.lead}>这里是{author}的个人信号站。收集技术的灵感、设计的细节，以及普通日子里闪光的片刻。</p>
-              <div className={styles.heroActions}><RetroLink href="#journal">进入文章档案 ↓</RetroLink><SiteInfoDialog /></div>
+              <div className={styles.heroActions}><RetroLink href="#journal">进入文章档案 ↓</RetroLink><SiteInfoDialog site={site} /></div>
               <div className={styles.hazard} aria-hidden="true"><span>///</span> CHROME MEMORY / ACID SIGNAL <span>///</span></div>
             </div>
 
             <div className={styles.featureZone}>
-              <RetroWindow title="FEATURED_POST.EXE" eyebrow="EDITOR'S PICK / DEMO CONTENT" className={styles.featureWindow}>
-                <div className={styles.featureMedia} aria-hidden="true"><div className={styles.orbit}><span>{featured?.issue ?? "000"}</span></div><span className={styles.mediaCaption}>N/N — SIGNAL {featured?.issue ?? "000"}</span></div>
-                <div className={styles.featureCopy}><span className={styles.featureTag}>{featured?.category ?? "频道"} / 示例文章</span><h2>{featured?.title ?? "暂无文章"}</h2><p>{featured?.excerpt ?? "这个频道还没有内容。"}</p><span className={styles.featureMeta}>{featured?.publishedAt.replaceAll("-", ".")} / {featured?.readingMinutes} MIN READ</span></div>
+              <RetroWindow title="FEATURED_POST.EXE" eyebrow="EDITOR'S PICK" className={styles.featureWindow}>
+                <div className={styles.featureMedia}>{featured?.cover ? <img className={styles.featureImage} src={featured.cover.src} alt={featured.cover.alt} /> : <div className={styles.orbit} aria-hidden="true"><span>{featured?.issue ?? "000"}</span></div>}<span className={styles.mediaCaption}>N/N — SIGNAL {featured?.issue ?? "000"}</span></div>
+                <div className={styles.featureCopy}><span className={styles.featureTag}>{featured?.category ?? "频道"} / 精选文章</span><h2>{featured?.title ?? "暂无文章"}</h2><p>{featured?.excerpt ?? "这个频道还没有内容。"}</p><span className={styles.featureMeta}>{featured?.publishedAt.replaceAll("-", ".")} / {featured?.readingMinutes} MIN READ</span></div>
               </RetroWindow>
             </div>
           </div>
@@ -60,16 +61,17 @@ export function HomeConsole({ posts, author }: { posts: PostSummary[]; author: s
       </section>
 
       <section id="journal" className={styles.journal} aria-labelledby="journal-title">
-        <div className={styles.journalHeader}><div><p>01 // PERSONAL ARCHIVE</p><h2 id="journal-title">最近的信号<span>_</span></h2></div><div className={styles.journalReadout} aria-live="polite">当前频道 <strong>{channel}</strong><br />检索结果 <strong>{String(visiblePosts.length).padStart(2, "0")}</strong> 条 · 演示内容</div></div>
-        <QueryTerminal lines={scriptFor(channel)} result={`${String(visiblePosts.length).padStart(2, "0")} records · DEMO DATA`} onComplete={() => setReady(true)} />
+        <div className={styles.journalHeader}><div><p>01 // PERSONAL ARCHIVE</p><h2 id="journal-title">最近的信号<span>_</span></h2></div><div className={styles.journalReadout} aria-live="polite">当前频道 <strong>{channel}</strong><br />检索结果 <strong>{String(visiblePosts.length).padStart(2, "0")}</strong> 条</div></div>
+        <QueryTerminal lines={scriptFor(channel)} result={`${String(visiblePosts.length).padStart(2, "0")} records`} onComplete={() => setReady(true)} />
         {!ready && <IndexLoader label="LATEST_SIGNALS.DAT" />}
         <div className={styles.journalBody} data-ready={ready || undefined}>
+          {!featured && <p>这个频道还没有已发布文章。</p>}
           {featured && <ArticleCard post={featured} featured />}
           {rest.length > 0 && <div className={styles.cards}>{rest.map((post) => <ArticleCard key={post.id} post={post} />)}</div>}
         </div>
       </section>
 
-      <section className={styles.endnote} aria-label="演示说明"><span className={styles.endnoteIcon}>!</span><div><h2>系统仍在装配中</h2><p>文章与评论均为演示内容。作者资料和发布后台会在后续阶段接入。</p></div><span className={styles.endnoteCode}>END_OF_SIGNAL</span></section>
+      <section className={styles.endnote} aria-label="站点说明"><span className={styles.endnoteIcon}>!</span><div><h2>信号持续更新中</h2><p>{site.description}</p></div><span className={styles.endnoteCode}>END_OF_SIGNAL</span></section>
     </>
   );
 }

@@ -1,14 +1,28 @@
-import { site } from "@/lib/site";
-import type { SocialLink } from "@/lib/links";
+"use client";
+
+import { useState } from 'react';
+import type { SiteData } from '@/lib/cms';
 import styles from "./AuthorCard.module.css";
 
-export function AuthorCard({ socials }: { socials: SocialLink[] }) {
+export function AuthorCard({ site }: { site: SiteData }) {
+  const [failedAvatar, setFailedAvatar] = useState<string>();
+  const showAvatar = Boolean(site.avatar?.src && failedAvatar !== site.avatar.src);
+
   return (
     <div className={styles.card}>
       <div className={styles.avatarCol}>
         <div className={styles.avatar} aria-hidden="true">
-          <span className={styles.avatarGlyph}>N</span>
-          <span className={styles.avatarTag}>AVATAR_PLACEHOLDER // NO SIGNAL</span>
+          <span className={styles.avatarGlyph}>{Array.from(site.author.trim())[0] || 'N'}</span>
+          {showAvatar && (
+            <img
+              className={styles.avatarImage}
+              src={site.avatar?.src}
+              alt=""
+              decoding="async"
+              onError={() => setFailedAvatar(site.avatar?.src)}
+            />
+          )}
+          <span className={styles.avatarTag}>OPERATOR // NO SIGNAL</span>
         </div>
         <div className={styles.lamps} aria-hidden="true">
           <span className={`${styles.lamp} ${styles.lampOn}`} />
@@ -19,20 +33,20 @@ export function AuthorCard({ socials }: { socials: SocialLink[] }) {
       </div>
 
       <div className={styles.info}>
-        <p className={styles.overline}>OPERATOR // STATION MASTER · DEMO PROFILE</p>
+        <p className={styles.overline}>OPERATOR // STATION MASTER</p>
         <h2 className={styles.name}>{site.author}</h2>
         <p className={styles.bio}>
-          {site.description}白天修理界面，夜里修理想法；这座信号站负责把技术、设计与日常之间的频段调成可以阅读的波形。以下社交账号均为演示占位，后续替换为真实链接。
+          {site.bio || site.description}
         </p>
         <ul className={styles.socials}>
-          {socials.map((social) => (
+          {site.socials.map((social) => (
             <li key={social.id}>
               <a
                 className={styles.social}
                 href={social.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label={`${social.label}：${social.handle}（演示链接，新窗口打开）`}
+                aria-label={`${social.label}：${social.handle}（新窗口打开）`}
               >
                 <span className={styles.socialLabel}>{social.label}</span>
                 <span className={styles.socialHandle}>{social.handle}</span>

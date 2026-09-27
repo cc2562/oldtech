@@ -3,7 +3,7 @@ export interface FriendLink {
   name: string;
   description: string;
   url: string;
-  icon: string;
+  iconUrl?: string;
   issue: string;
   isDemo?: boolean;
 }
@@ -26,7 +26,6 @@ export const friendLinks: FriendLink[] = [
     name: "Mozilla MDN",
     description: "开放 Web 的技术文档库，查询标准 API 时最常转发的信号源。",
     url: "https://developer.mozilla.org/zh-CN/",
-    icon: "M",
     issue: "001",
     isDemo: true,
   },
@@ -35,7 +34,6 @@ export const friendLinks: FriendLink[] = [
     name: "CSS-Tricks",
     description: "关于层叠、布局与各种前端技巧的老牌笔记站。",
     url: "https://css-tricks.com/",
-    icon: "C",
     issue: "002",
     isDemo: true,
   },
@@ -44,7 +42,6 @@ export const friendLinks: FriendLink[] = [
     name: "Smashing Magazine",
     description: "设计与前端交叉地带的长期读物，排版与可用性并重。",
     url: "https://www.smashingmagazine.com/",
-    icon: "S",
     issue: "003",
     isDemo: true,
   },
@@ -53,7 +50,6 @@ export const friendLinks: FriendLink[] = [
     name: "neal.fun",
     description: "把浏览器当作玩具的一系列互动小实验，灵感补给站。",
     url: "https://neal.fun/",
-    icon: "N",
     issue: "004",
     isDemo: true,
   },
@@ -62,7 +58,6 @@ export const friendLinks: FriendLink[] = [
     name: "The Pudding",
     description: "用数据与视觉讲故事的编辑部，每篇都是精心制作的窗口。",
     url: "https://pudding.cool/",
-    icon: "P",
     issue: "005",
     isDemo: true,
   },
@@ -71,7 +66,6 @@ export const friendLinks: FriendLink[] = [
     name: "Internet Archive",
     description: "打捞旧网页与旧软件的时光机，怀旧信号的终点站。",
     url: "https://archive.org/",
-    icon: "A",
     issue: "006",
     isDemo: true,
   },

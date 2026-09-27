@@ -2,7 +2,6 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { posts } from "@/lib/posts";
 import styles from "./PjaxProvider.module.css";
 
 const OUTRO_LINE = "> render module [ OK ]";
@@ -13,8 +12,7 @@ function buildLines(href: string): string[] {
   if (path === "/components") return ["> GET /components", "> mount ShowcaseIndex [ OK ]"];
   if (path.startsWith("/posts/")) {
     const slug = path.slice("/posts/".length);
-    const post = posts.find((p) => p.slug === slug);
-    return [`> GET /posts/${slug}`, `> open POST_${post?.issue ?? "???"}.LOG [ OK ]`];
+    return [`> GET /posts/${slug}`, `> open ARTICLE.LOG [ OK ]`];
   }
   return [`> GET ${path}`];
 }

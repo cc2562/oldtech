@@ -12,7 +12,8 @@ import { SiteInfoDialog } from "@/components/SiteInfoDialog";
 import { TerminalStatus } from "@/components/TerminalStatus";
 import { LinkCard } from "@/components/LinkCard";
 import { friendLinks } from "@/lib/links";
-import { posts } from "@/lib/posts";
+import { getPublishedPosts } from '@/lib/cms';
+import { site } from '@/lib/site';
 import styles from "./page.module.css";
 
 export const metadata: Metadata = { title: "组件展台" };
@@ -24,7 +25,8 @@ const colors = [
   { name: "CHROME LIGHT", token: "--paper", value: "#F4F0FB", className: styles.paper },
 ];
 
-export default function ComponentsPage() {
+export default async function ComponentsPage() {
+  const posts = await getPublishedPosts();
   return (
     <div className={styles.page}>
       <header className={styles.intro}>
@@ -51,7 +53,7 @@ export default function ComponentsPage() {
       <section className={styles.section} aria-labelledby="window-title">
         <div className={styles.sectionTitle}><span>04</span><div><p>WINDOW SYSTEM</p><h2 id="window-title">窗口与终端</h2></div></div>
         <div className={styles.systemGrid}>
-          <RetroWindow title="ARCHIVE_NOTICE.TXT" eyebrow="WINDOW 98 / PERSONAL FILE"><h3>界面正在调频。</h3><p>这是承载精选文章和系统消息的内容窗口。标题栏与边框负责表达年代感，正文仍以阅读为先。</p><div className={styles.windowAction}><SiteInfoDialog /></div></RetroWindow>
+          <RetroWindow title="ARCHIVE_NOTICE.TXT" eyebrow="WINDOW 98 / PERSONAL FILE"><h3>界面正在调频。</h3><p>这是承载精选文章和系统消息的内容窗口。标题栏与边框负责表达年代感，正文仍以阅读为先。</p><div className={styles.windowAction}><SiteInfoDialog site={site} /></div></RetroWindow>
           <TerminalStatus typewriter lines={["mount /archive", "connect personal_signal"]} />
         </div>
         <div className={styles.termDemo}>
@@ -65,7 +67,7 @@ export default function ComponentsPage() {
           <p>站内链接由 PJAX 系统接管：点击后页面中央出现 NAV.SYS 终端，跑完代码再完成跳转；浏览器前进后退会播放短版 restore 脚本。点击下面的按钮亲身体验。</p>
           <div className={styles.navActions}>
             <RetroLink href="/">演示：返回首页 ↗</RetroLink>
-            <RetroLink href={`/posts/${posts[0].slug}`} variant="violet">演示：打开文章 ↗</RetroLink>
+            {posts[0] && <RetroLink href={`/posts/${posts[0].slug}`} variant="violet">打开文章 ↗</RetroLink>}
           </div>
         </div>
       </section>
@@ -82,12 +84,12 @@ export default function ComponentsPage() {
 
       <section className={styles.section} aria-labelledby="card-title">
         <div className={styles.sectionTitle}><span>06</span><div><p>CONTENT</p><h2 id="card-title">文章卡片</h2></div></div>
-        <div className={styles.cardPanel}><ArticleCard post={posts[1]} /><div className={styles.cardNotes}><span className={styles.noteTag}>DEMO DATA</span><h3>每张卡片都是一扇小窗口。</h3><p>卡片套用了 Windows 98 的窗口语言：渐变标题栏、期号与文件名、装饰性窗口按钮，正文留在凹陷的内容区里。第一阶段没有文章详情页，因此它保持静态，不制造无法完成的点击。</p><ul><li>标题栏携带期号与文件名</li><li>摘要保持舒适行距</li><li>元信息退居次要层级</li></ul></div></div>
+        <div className={styles.cardPanel}>{posts[0] ? <ArticleCard post={posts[0]} /> : <p>发布文章后，这里会展示真实文章卡片。</p>}<div className={styles.cardNotes}><h3>每张卡片都是一扇小窗口。</h3><p>卡片套用 Windows 98 的窗口语言：渐变标题栏、期号与文件名、装饰性窗口按钮，正文留在凹陷的内容区里。</p><ul><li>标题栏携带期号与文件名</li><li>摘要保持舒适行距</li><li>元信息退居次要层级</li></ul></div></div>
       </section>
 
       <section className={styles.section} aria-labelledby="rows-title">
         <div className={styles.sectionTitle}><span>09</span><div><p>ARCHIVE INDEX</p><h2 id="rows-title">文章索引行与悬浮预览</h2></div></div>
-        <PostRowDemo posts={posts} />
+        {posts.length > 0 ? <PostRowDemo posts={posts} /> : <p>发布文章后，这里会展示真实文章索引。</p>}
         <p className={styles.ambientCaption}>POST ROW — /posts 档案页的文字索引行；带封面的行在光标悬浮时以故障效果浮现预览图并跟随移动，触摸设备与「减少动态效果」下不显示。第 4 篇无封面，仅作文字高亮对照。</p>
       </section>
 

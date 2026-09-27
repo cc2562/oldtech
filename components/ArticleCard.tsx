@@ -9,7 +9,7 @@ function Titlebar({ issue, demo, kind }: { issue: string; demo?: boolean; kind: 
       <span className={styles.issue}>/{issue}</span>
       <span className={styles.titlebarName}>{kind === "FEATURED" ? `FEATURED_${issue}.EXE` : `POST_${issue}.LOG`}</span>
       {demo && <span className={styles.demo}>示例文章</span>}
-      <span className={styles.controls} aria-hidden="true"><i>_</i><i>□</i><i>×</i></span>
+      <span className={styles.controls} aria-hidden="true"><i className={styles.min} /><i>□</i><i>×</i></span>
     </div>
   );
 }
@@ -21,8 +21,8 @@ export function ArticleCard({ post, featured = false }: { post: PostSummary; fea
         <Link href={`/posts/${post.slug}`} className={styles.cardLink} aria-label={`阅读文章：${post.title}`}>
           <Titlebar issue={post.issue} demo={post.isDemo} kind="FEATURED" />
           <div className={styles.featureMain}>
-            <div className={styles.featureVisual} aria-hidden="true">
-              <div className={styles.featureDial}><span>FUTURE<br />MEMORY</span></div>
+            <div className={styles.featureVisual}>
+              {post.cover ? <img className={styles.featureImage} src={post.cover.src} alt={post.cover.alt} /> : <div className={styles.featureDial} aria-hidden="true"><span>FUTURE<br />MEMORY</span></div>}
               <span className={styles.visualIndex}>N° {post.issue} / SIGNAL ARCHIVE</span>
             </div>
             <div className={styles.featureBody}>

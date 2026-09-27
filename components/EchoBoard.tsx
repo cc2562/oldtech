@@ -3,30 +3,57 @@
 import { useEffect, useRef, useState } from "react";
 import { RetroButton } from "./RetroButton";
 import { RetroWindow } from "./RetroWindow";
-import type { DemoComment } from "@/lib/postDetails";
+import type { PublicComment } from '@/lib/cms';
 import styles from "./EchoBoard.module.css";
 
-type LocalComment = DemoComment & { local?: boolean };
+type LocalComment = PublicComment;
 type SendPhase = "idle" | "sending" | "done" | "error";
+type DisplayComment = { comment: LocalComment; depth: number };
+
+function orderCommentThread(comments: LocalComment[]): DisplayComment[] {
+  const nodes = new Map(comments.map((comment) => [comment.id, { comment, children: [] as LocalComment[] }]));
+  const roots: LocalComment[] = [];
+
+  for (const comment of comments) {
+    const parent = comment.parentId ? nodes.get(comment.parentId) : undefined;
+    if (parent && parent.comment.id !== comment.id) parent.children.push(comment);
+    else roots.push(comment);
+  }
+
+  const result: DisplayComment[] = [];
+  const visited = new Set<string>();
+  const visit = (comment: LocalComment, depth: number) => {
+    if (visited.has(comment.id)) return;
+    visited.add(comment.id);
+    result.push({ comment, depth });
+    for (const child of nodes.get(comment.id)?.children || []) visit(child, depth + 1);
+  };
+  for (const root of roots) visit(root, 0);
+  for (const comment of comments) visit(comment, 0);
+  return result;
+}
 
 /**
- * Interactive echo board. Focusing the compose box unfolds the identity fields
- * (nick / mail / site). Sending pops up a mini terminal that types a simulated
- * transmit script, then appends the echo to the local list — demo only, no
- * persistence. Reduced motion prints the script instantly.
+ * Persistent comment board with optional identity fields, moderated replies,
+ * and a terminal-style send animation. Reduced motion prints the script at once.
  */
-export function EchoBoard({ issue, comments: initialComments }: { issue: string; comments: DemoComment[] }) {
+export function EchoBoard({ issue, slug, comments: initialComments }: { issue: string; slug: string; comments: PublicComment[] }) {
   const [comments, setComments] = useState<LocalComment[]>(initialComments);
   const [expanded, setExpanded] = useState(false);
   const [draft, setDraft] = useState("");
   const [nick, setNick] = useState("");
   const [email, setEmail] = useState("");
   const [site, setSite] = useState("");
+  const [replyTo, setReplyTo] = useState<LocalComment | null>(null);
+  const [trap, setTrap] = useState("");
+  const [result, setResult] = useState("");
   const [phase, setPhase] = useState<SendPhase>("idle");
   const [typed, setTyped] = useState<string[]>([]);
   const [current, setCurrent] = useState("");
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
   const mirrorRef = useRef<HTMLDivElement>(null);
+  const composeRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     const stash = timers.current;
@@ -46,17 +73,38 @@ export function EchoBoard({ issue, comments: initialComments }: { issue: string;
     later(remeasure, 400);
   };
 
-  const finish = (ok: boolean) => {
-    if (ok) {
-      setComments((prev) => [...prev, { id: `local-${Date.now()}`, author: nick.trim(), postedAt: "刚刚 · LOCAL", text: draft.trim(), local: true }]);
-      setDraft("");
-      later(remeasure, 80);
+  const finish = async (ok: boolean) => {
+    if (!ok) {
+      setResult("// ERR 400 · NICK 与正文为必填项");
+      setPhase("error");
+    } else {
+      try {
+        const response = await fetch('/api/echo', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ slug, author: nick.trim(), text: draft.trim(), email: email.trim(), site: site.trim(), parentId: replyTo?.id, trap }),
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || '发送失败');
+        if (data.status === 'approved' && data.comment) {
+          setComments((prev) => [...prev, data.comment]);
+          setResult('// ECHO_PUBLISHED · 评论已公开');
+        } else {
+          setResult('// ECHO_QUEUED · 已提交，等待审核');
+        }
+        setDraft('');
+        setReplyTo(null);
+        later(remeasure, 80);
+        setPhase('done');
+      } catch (error) {
+        setResult(`// ERR · ${error instanceof Error ? error.message : '发送失败'}`);
+        setPhase('error');
+      }
     }
-    setPhase(ok ? "done" : "error");
     later(() => {
       setPhase("idle");
       setTyped([]);
       setCurrent("");
+      setResult("");
     }, 2600);
   };
 
@@ -67,7 +115,7 @@ export function EchoBoard({ issue, comments: initialComments }: { issue: string;
       ? [`auth --guest --nick="${nick.trim() || "?"}"`, "verify --fields=nick,body"]
       : [
           `auth --guest --nick="${nick.trim()}"${site.trim() ? ` --site=${site.trim()}` : ""}`,
-          `sign payload --bytes=${new Blob([draft]).size} --algo=DEMO-MD5`,
+          `sign payload --bytes=${new Blob([draft]).size}`,
           `transmit --to=ECHO_BOARD --slot=${String(comments.length + 1).padStart(2, "0")}`,
         ];
     setPhase("sending");
@@ -106,30 +154,55 @@ export function EchoBoard({ issue, comments: initialComments }: { issue: string;
     later(step, 200);
   };
 
+  const handleReply = (comment: LocalComment) => {
+    if (phase === 'sending') return;
+    setReplyTo(comment);
+    setExpanded(true);
+    requestAnimationFrame(() => {
+      composeRef.current?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' });
+      textareaRef.current?.focus({ preventScroll: true });
+      remeasure();
+    });
+  };
+
   const sending = phase === "sending";
+  const displayedComments = orderCommentThread(comments);
 
   return (
-    <RetroWindow title="ECHO_BOARD.EXE" eyebrow={`回声留言板 // ${comments.length} MESSAGES · DEMO`} className={styles.echoWindow}>
+    <RetroWindow title="ECHO_BOARD.EXE" eyebrow={`回声留言板 // ${comments.length} MESSAGES`} className={styles.echoWindow}>
       <ol className={styles.echoList}>
-        {comments.map((comment) => (
-          <li key={comment.id}>
-            <p className={styles.echoHead}><span>&gt;</span> {comment.author} <em>:: {comment.postedAt}</em>{comment.local ? <b className={styles.localTag}>LOCAL</b> : null}</p>
+        {displayedComments.map(({ comment, depth }) => (
+          <li key={comment.id} className={`${styles.echoItem} ${styles[`depth${Math.min(depth, 3)}`]}`}>
+            <p className={styles.echoHead}>
+              <span>&gt;</span>{' '}
+              {comment.site ? (
+                <a className={styles.authorLink} href={comment.site} target="_blank" rel="noopener noreferrer">{comment.author}</a>
+              ) : comment.author}
+              {' '}<em>:: {comment.postedAt}</em>
+              <button className={styles.replyButton} type="button" onClick={() => handleReply(comment)} disabled={sending}>回复</button>
+            </p>
             <p className={styles.echoText}>{comment.text}</p>
           </li>
         ))}
       </ol>
 
-      <div className={styles.compose}>
-        <span className={styles.demoTag}>DEMO</span>
-        <p className={styles.composeLine}>&gt; compose --reply --post=POST_{issue}.LOG</p>
+      <div className={styles.compose} ref={composeRef}>
+        <p className={styles.composeLine}>&gt; compose --reply --post=POST_{issue}.LOG{replyTo ? ` --parent=${replyTo.id}` : ''}</p>
+        {replyTo && (
+          <div className={styles.replyTarget}>
+            <span>REPLY_TO :: @{replyTo.author}</span>
+            <button type="button" onClick={() => setReplyTo(null)} disabled={sending}>取消回复</button>
+          </div>
+        )}
         <div className={styles.termBox}>
           <span className={styles.prompt} aria-hidden="true">{nick.trim() ? `${nick.trim()}>` : ">"}</span>
           <div className={styles.inputWrap}>
             <div className={styles.mirror} ref={mirrorRef} aria-hidden="true">
-              {draft === "" ? <span className={styles.mirrorPlaceholder}>写下你的回声…（演示环境，评论仅追加在当前页面）</span> : draft}
+              {draft === "" ? <span className={styles.mirrorPlaceholder}>写下你的回声…</span> : draft}
               <span className={styles.fakeCursor}>_</span>
             </div>
             <textarea
+              ref={textareaRef}
               className={styles.ghostInput}
               value={draft}
               onChange={(event) => setDraft(event.target.value)}
@@ -140,9 +213,11 @@ export function EchoBoard({ issue, comments: initialComments }: { issue: string;
               rows={3}
               disabled={sending}
               aria-label="评论内容"
+              maxLength={2000}
             />
           </div>
         </div>
+        <label style={{ position: 'absolute', left: '-9999px' }} aria-hidden="true">请勿填写<input tabIndex={-1} autoComplete="off" value={trap} onChange={(event) => setTrap(event.target.value)} /></label>
         <div className={styles.identity} data-open={expanded || undefined}>
           <div className={styles.identityInner}>
             <div className={styles.fields}>
@@ -168,14 +243,14 @@ export function EchoBoard({ issue, comments: initialComments }: { issue: string;
               <p key={line} className={styles.termLine}><span className={styles.gt}>&gt;</span> {line}</p>
             ))}
             {sending && <p className={styles.termLine}><span className={styles.gt}>&gt;</span> {current}<span className={styles.cursor}>_</span></p>}
-            {phase === "done" && <p className={styles.termResult}>{"// ECHO_QUEUED · 已追加到本地列表（演示，不持久化）"}<span className={styles.cursor}>_</span></p>}
-            {phase === "error" && <p className={styles.termError}>{"// ERR 400 · NICK 与正文为必填项"}<span className={styles.cursor}>_</span></p>}
+            {phase === "done" && <p className={styles.termResult}>{result}<span className={styles.cursor}>_</span></p>}
+            {phase === "error" && <p className={styles.termError}>{result}<span className={styles.cursor}>_</span></p>}
           </div>
         )}
 
         <div className={styles.composeActions}>
           <RetroButton variant="signal" compact onClick={handleSend} disabled={sending}>{sending ? "发送中…" : "发送 ↗"}</RetroButton>
-          <span className={styles.composeNote}>本地演示：发送后追加到上方列表，刷新页面后消失。</span>
+          <span className={styles.composeNote}>评论会保存；如站长开启审核，通过后才公开。</span>
         </div>
       </div>
     </RetroWindow>
