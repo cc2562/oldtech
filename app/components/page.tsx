@@ -4,6 +4,7 @@ import { ButtonDemo } from "@/components/ButtonDemo";
 import { ChannelDemo } from "@/components/ChannelDemo";
 import { HeroParticles } from "@/components/HeroParticles";
 import { PixelField } from "@/components/PixelField";
+import { PostRowDemo } from "@/components/PostRowDemo";
 import { QueryTerminal } from "@/components/QueryTerminal";
 import { RetroWindow } from "@/components/RetroWindow";
 import { RetroLink } from "@/components/RetroButton";
@@ -80,6 +81,12 @@ export default function ComponentsPage() {
       <section className={styles.section} aria-labelledby="card-title">
         <div className={styles.sectionTitle}><span>06</span><div><p>CONTENT</p><h2 id="card-title">文章卡片</h2></div></div>
         <div className={styles.cardPanel}><ArticleCard post={posts[1]} /><div className={styles.cardNotes}><span className={styles.noteTag}>DEMO DATA</span><h3>每张卡片都是一扇小窗口。</h3><p>卡片套用了 Windows 98 的窗口语言：渐变标题栏、期号与文件名、装饰性窗口按钮，正文留在凹陷的内容区里。第一阶段没有文章详情页，因此它保持静态，不制造无法完成的点击。</p><ul><li>标题栏携带期号与文件名</li><li>摘要保持舒适行距</li><li>元信息退居次要层级</li></ul></div></div>
+      </section>
+
+      <section className={styles.section} aria-labelledby="rows-title">
+        <div className={styles.sectionTitle}><span>09</span><div><p>ARCHIVE INDEX</p><h2 id="rows-title">文章索引行与悬浮预览</h2></div></div>
+        <PostRowDemo posts={posts} />
+        <p className={styles.ambientCaption}>POST ROW — /posts 档案页的文字索引行；带封面的行在光标悬浮时以故障效果浮现预览图并跟随移动，触摸设备与「减少动态效果」下不显示。第 4 篇无封面，仅作文字高亮对照。</p>
       </section>
 
       <section className={styles.section} aria-labelledby="ambient-title">

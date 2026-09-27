@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" role="img" aria-label="桌面上的一小块未来 — 占位封面">
+  <defs>
+    <radialGradient id="g1" cx="50%" cy="42%" r="70%">
+      <stop offset="0%" stop-color="#2c1546"/>
+      <stop offset="60%" stop-color="#171226"/>
+      <stop offset="100%" stop-color="#0d0a1a"/>
+    </radialGradient>
+    <linearGradient id="chrome1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e6eaf2"/>
+      <stop offset="45%" stop-color="#8d93a4"/>
+      <stop offset="55%" stop-color="#5b6072"/>
+      <stop offset="100%" stop-color="#c0c6d4"/>
+    </linearGradient>
+    <pattern id="scan1" width="1" height="5" patternUnits="userSpaceOnUse">
+      <rect width="1" height="2" fill="#f4ed18" opacity="0.06"/>
+    </pattern>
+  </defs>
+  <rect width="640" height="400" fill="url(#g1)"/>
+  <rect width="640" height="400" fill="url(#scan1)"/>
+  <g fill="none" stroke-linecap="round">
+    <circle cx="320" cy="200" r="132" stroke="#6d28d9" stroke-width="2" opacity="0.8"/>
+    <circle cx="320" cy="200" r="108" stroke="#c0c6d4" stroke-width="1.5" opacity="0.55" stroke-dasharray="4 10"/>
+    <ellipse cx="320" cy="200" rx="188" ry="60" stroke="#8244c7" stroke-width="2" opacity="0.7" transform="rotate(-18 320 200)"/>
+  </g>
+  <circle cx="320" cy="200" r="72" fill="url(#chrome1)" stroke="#050308" stroke-width="3"/>
+  <circle cx="320" cy="200" r="72" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.35" stroke-dasharray="130 330" stroke-linecap="round" transform="rotate(-30 320 200)"/>
+  <circle cx="320" cy="200" r="40" fill="#0d0a1a" stroke="#f4ed18" stroke-width="3"/>
+  <rect x="312" y="168" width="16" height="34" rx="3" fill="#f4ed18" transform="rotate(28 320 200)"/>
+  <g fill="#f4ed18">
+    <circle cx="452" cy="128" r="5"/>
+    <circle cx="474" cy="144" r="3.5" opacity="0.7"/>
+    <circle cx="188" cy="272" r="4" opacity="0.85"/>
+  </g>
+  <g font-family="ui-monospace,Consolas,monospace" fill="#f4ed18">
+    <text x="26" y="42" font-size="17" font-weight="700" letter-spacing="2">SIGNAL_001.LOG</text>
+    <text x="26" y="372" font-size="13" opacity="0.75" letter-spacing="1">NN // COVER PLACEHOLDER · 640×400</text>
+  </g>
+  <g stroke="#f4ed18" stroke-width="3" opacity="0.9">
+    <path d="M 540 372 h 64"/>
+    <path d="M 560 352 h 44" opacity="0.5"/>
+  </g>
+  <rect x="10" y="10" width="620" height="380" fill="none" stroke="#c0c6d4" stroke-width="2" opacity="0.5"/>
+</svg>

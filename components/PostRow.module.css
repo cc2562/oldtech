@@ -1,0 +1,46 @@
+.row {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(148px, auto) minmax(0, 1fr) auto;
+  grid-template-areas: "issue main meta";
+  align-items: center;
+  gap: 10px 26px;
+  padding: 19px 18px;
+  color: inherit;
+  transition: background-color .18s ease;
+}
+.row::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--signal);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform .3s ease;
+}
+.row:hover, .row:focus-visible { background: linear-gradient(90deg, #f4ed180f, transparent 62%); }
+.row:hover::after, .row:focus-visible::after { transform: scaleX(1); }
+.issue { grid-area: issue; color: var(--violet-bright); font: 800 12px var(--font-mono); letter-spacing: .04em; white-space: nowrap; transition: color .18s ease; }
+.row:hover .issue, .row:focus-visible .issue { color: var(--signal); }
+.main { grid-area: main; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.title { font-size: 18px; font-weight: 600; line-height: 1.4; }
+.row:hover .title, .row:focus-visible .title { color: var(--signal); text-shadow: 2px 2px #2c1546; animation: textGlitch .32s steps(2, end) 1; }
+.excerpt { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; color: var(--muted); font-size: 14px; line-height: 1.6; }
+.meta { grid-area: meta; display: flex; align-items: center; gap: 10px; color: var(--muted); font: 700 11px var(--font-mono); white-space: nowrap; }
+.meta > span + span::before { content: "·"; margin-right: 10px; color: #655076; }
+.demo { padding: 1px 5px; border: 1px solid #8c7a04; color: var(--signal); font-size: 10px; }
+.arrow { color: var(--violet-bright); font-size: 15px; transition: transform .18s ease, color .18s ease; }
+.row:hover .arrow, .row:focus-visible .arrow { color: var(--signal); transform: translateX(4px); }
+@keyframes textGlitch {
+  0% { text-shadow: -2px 0 #f4ed18, 2px 0 #8244c7; }
+  50% { text-shadow: 2px 0 #f4ed18, -2px 0 #b78af0; }
+  100% { text-shadow: 2px 2px #2c1546; }
+}
+@media (max-width: 680px) {
+  .row { grid-template-columns: minmax(0, 1fr); grid-template-areas: "issue" "main" "meta"; gap: 5px; padding: 16px 13px; }
+  .excerpt { -webkit-line-clamp: 3; }
+  .meta { flex-wrap: wrap; white-space: normal; }
+}

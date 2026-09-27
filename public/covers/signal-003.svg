@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" role="img" aria-label="雨停以后，城市还亮着 — 占位封面">
+  <defs>
+    <linearGradient id="g3" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0d0a1a"/>
+      <stop offset="55%" stop-color="#1b1233"/>
+      <stop offset="100%" stop-color="#2c1546"/>
+    </linearGradient>
+    <filter id="glow3" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <pattern id="scan3" width="1" height="5" patternUnits="userSpaceOnUse">
+      <rect width="1" height="2" fill="#f4ed18" opacity="0.05"/>
+    </pattern>
+  </defs>
+  <rect width="640" height="400" fill="url(#g3)"/>
+  <rect width="640" height="400" fill="url(#scan3)"/>
+  <g stroke="#8244c7" stroke-width="2" opacity="0.35">
+    <path d="M 60 60 l 0 60"/><path d="M 140 40 l 0 44"/><path d="M 520 52 l 0 52"/>
+    <path d="M 590 70 l 0 36"/><path d="M 250 48 l 0 40"/><path d="M 430 44 l 0 30"/>
+  </g>
+  <g fill="#141021">
+    <rect x="40" y="180" width="90" height="180"/>
+    <rect x="150" y="140" width="120" height="220"/>
+    <rect x="290" y="200" width="80" height="160"/>
+    <rect x="390" y="120" width="110" height="240"/>
+    <rect x="520" y="170" width="90" height="190"/>
+  </g>
+  <g filter="url(#glow3)">
+    <rect x="170" y="160" width="16" height="150" fill="#f4ed18"/>
+    <rect x="196" y="160" width="16" height="150" fill="#8244c7"/>
+    <rect x="414" y="140" width="14" height="180" fill="#f4ed18"/>
+    <rect x="440" y="140" width="14" height="180" fill="#b78af0"/>
+    <rect x="540" y="190" width="12" height="130" fill="#f4ed18" opacity="0.85"/>
+    <rect x="62" y="200" width="10" height="120" fill="#c0c6d4" opacity="0.6"/>
+  </g>
+  <g fill="#f4ed18" opacity="0.8">
+    <rect x="300" y="220" width="8" height="8"/><rect x="322" y="248" width="8" height="8"/>
+    <rect x="300" y="276" width="8" height="8"/><rect x="344" y="222" width="8" height="8" opacity="0.5"/>
+  </g>
+  <path d="M 0 360 h 640" stroke="#f4ed18" stroke-width="2" opacity="0.4"/>
+  <g font-family="ui-monospace,Consolas,monospace" fill="#f4ed18">
+    <text x="26" y="42" font-size="17" font-weight="700" letter-spacing="2">SIGNAL_003.LOG</text>
+    <text x="26" y="388" font-size="13" opacity="0.75" letter-spacing="1">NN // COVER PLACEHOLDER · 640×400</text>
+  </g>
+  <rect x="10" y="10" width="620" height="380" fill="none" stroke="#c0c6d4" stroke-width="2" opacity="0.5"/>
+</svg>

@@ -4,20 +4,14 @@ import { useState } from "react";
 import { ArticleCard } from "./ArticleCard";
 import { ChannelKnob, type Channel } from "./ChannelKnob";
 import { HeroParticles } from "./HeroParticles";
-import { QueryTerminal, hasQueryPlayed } from "./QueryTerminal";
+import { IndexLoader } from "./IndexLoader";
+import { QueryTerminal, hasQueryPlayed, scriptFor, scriptKey } from "./QueryTerminal";
 import { RetroLink } from "./RetroButton";
 import { RetroWindow } from "./RetroWindow";
 import { SiteInfoDialog } from "./SiteInfoDialog";
 import { TerminalStatus } from "./TerminalStatus";
 import type { PostSummary } from "@/lib/posts";
 import styles from "./HomeConsole.module.css";
-
-const scriptFor = (ch: Channel) => [
-  "open archive.db --mode=ro",
-  `query --channel=${ch} --sort=date.desc --limit=12`,
-  "hydrate cards --skin=win98",
-];
-const scriptKey = (ch: Channel) => scriptFor(ch).join("\n");
 
 export function HomeConsole({ posts, author }: { posts: PostSummary[]; author: string }) {
   const [channel, setChannel] = useState<Channel>("全部");
@@ -68,6 +62,7 @@ export function HomeConsole({ posts, author }: { posts: PostSummary[]; author: s
       <section id="journal" className={styles.journal} aria-labelledby="journal-title">
         <div className={styles.journalHeader}><div><p>01 // PERSONAL ARCHIVE</p><h2 id="journal-title">最近的信号<span>_</span></h2></div><div className={styles.journalReadout} aria-live="polite">当前频道 <strong>{channel}</strong><br />检索结果 <strong>{String(visiblePosts.length).padStart(2, "0")}</strong> 条 · 演示内容</div></div>
         <QueryTerminal lines={scriptFor(channel)} result={`${String(visiblePosts.length).padStart(2, "0")} records · DEMO DATA`} onComplete={() => setReady(true)} />
+        {!ready && <IndexLoader label="LATEST_SIGNALS.DAT" />}
         <div className={styles.journalBody} data-ready={ready || undefined}>
           {featured && <ArticleCard post={featured} featured />}
           {rest.length > 0 && <div className={styles.cards}>{rest.map((post) => <ArticleCard key={post.id} post={post} />)}</div>}

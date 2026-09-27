@@ -6,14 +6,14 @@ import styles from "./ChannelKnob.module.css";
 
 export type Channel = "全部" | PostCategory;
 
-const channels: Channel[] = ["全部", "技术", "设计", "生活"];
+export const channels: Channel[] = ["全部", "技术", "设计", "生活"];
 const angles = [-45, 45, 135, -135];
 
 function angularDistance(a: number, b: number) {
   return Math.abs(((a - b + 540) % 360) - 180);
 }
 
-export function ChannelKnob({ value, onChange, compact = false }: { value: Channel; onChange: (value: Channel) => void; compact?: boolean }) {
+export function ChannelKnob({ value, onChange, compact = false, showReadout = true }: { value: Channel; onChange: (value: Channel) => void; compact?: boolean; showReadout?: boolean }) {
   const dialRef = useRef<HTMLDivElement>(null);
   const dragging = useRef(false);
   const [previewIndex, setPreviewIndex] = useState<number | null>(null);
@@ -78,7 +78,7 @@ export function ChannelKnob({ value, onChange, compact = false }: { value: Chann
           <span className={styles.center} aria-hidden="true">N/N</span>
         </div>
       </div>
-      <p className={styles.readout}><span className={styles.led} /> 当前频道 <strong>{value}</strong></p>
+      {showReadout ? <p className={styles.readout}><span className={styles.led} /> 当前频道 <strong>{value}</strong></p> : null}
     </div>
   );
 }

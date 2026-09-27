@@ -1,14 +1,14 @@
 .instrument { min-width: 0; padding: 15px 17px 12px; border: 2px solid #d3d1df; background: linear-gradient(145deg, #f1eff7, #a3a0b0 58%, #696678); color: #20152b; box-shadow: inset 2px 2px #fff, inset -3px -3px #514c61, 5px 6px 0 #08060c; }
 .heading { display: flex; justify-content: space-between; gap: 8px; padding-bottom: 7px; border-bottom: 1px solid #595365; font: 900 11px/1.2 var(--font-mono); letter-spacing: .08em; }
 .serial { color: #504a5e; font-size: 10px; }
-.control { position: relative; width: min(100%, 290px); height: 190px; margin: 0 auto; display: grid; place-items: center; }
-.labels { position: absolute; inset: 0; }
-.label { position: absolute; min-width: 62px; padding: 3px 5px; border: 1px solid transparent; background: transparent; color: #332b40; font-size: 13px; font-weight: 900; line-height: 1.2; cursor: pointer; }
+.control { position: relative; width: min(100%, 320px); height: 200px; margin: 0 auto; display: grid; place-items: center; }
+.labels { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+.label { position: absolute; min-width: 62px; padding: 3px 5px; border: 1px solid transparent; background: transparent; color: #332b40; font-size: 13px; font-weight: 900; line-height: 1.2; cursor: pointer; pointer-events: auto; }
 .label:hover, .label.selected { border-color: #26202d; background: var(--signal); box-shadow: 2px 2px 0 #4e4655; }
-.label0 { top: 21px; left: 2px; }
-.label1 { top: 21px; right: 2px; }
-.label2 { bottom: 19px; right: 2px; }
-.label3 { bottom: 19px; left: 2px; }
+.label0 { top: 4px; left: 4px; }
+.label1 { top: 4px; right: 4px; }
+.label2 { bottom: 4px; right: 4px; }
+.label3 { bottom: 4px; left: 4px; }
 .labelIndex { display: block; font: 700 9px var(--font-mono); opacity: .7; }
 .dial { position: relative; z-index: 1; width: 138px; height: 138px; border: 7px solid #2b2933; border-radius: 50%; background: repeating-conic-gradient(#a8a7af 0deg 5deg, #72717b 5deg 8deg); box-shadow: 0 0 0 4px #77717f, 0 0 0 7px #ece9f0, inset 0 0 7px #111; cursor: grab; touch-action: none; }
 .dial:active { cursor: grabbing; }
@@ -19,5 +19,5 @@
 .readout { display: flex; align-items: center; gap: 8px; margin: 0; padding: 7px 9px; border: 2px inset #858090; background: #17111f; color: #d8d2df; font: 700 12px var(--font-mono); }
 .readout strong { color: var(--signal); }
 .led { width: 8px; height: 8px; border-radius: 50%; background: var(--signal); box-shadow: 0 0 8px var(--signal); }
-.compact .control { height: 175px; }
-@media (max-width: 420px) { .control { height: 172px; } .dial { width: 120px; height: 120px; } .label { min-width: 56px; font-size: 12px; } }
+.compact .control { height: 188px; }
+@media (max-width: 420px) { .control { height: 184px; } .dial { width: 120px; height: 120px; } .label { min-width: 56px; font-size: 12px; } }

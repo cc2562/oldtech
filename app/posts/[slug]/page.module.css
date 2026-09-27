@@ -22,23 +22,8 @@
 .prose { max-width: 680px; margin: 0 auto; }
 .prose p { margin: 0 0 22px; color: var(--paper); font-size: 16px; line-height: 1.9; }
 .pullQuote { margin: 30px 0; padding: 14px 20px; border-left: 3px solid var(--signal); background: #f4ed1810; color: #fff4b9; font-size: 18px; font-weight: 700; line-height: 1.7; }
-.echoWindow { margin-bottom: 10px; }
-.echoList { display: grid; gap: 0; margin: 0 0 18px; padding: 0; list-style: none; }
-.echoList li { padding: 12px 2px; border-bottom: 1px solid #65507666; }
-.echoList li:last-child { border-bottom: 0; }
-.echoHead { margin: 0 0 5px; color: var(--violet-bright); font: 800 12px var(--font-mono); }
-.echoHead span { color: var(--signal); margin-right: 6px; }
-.echoHead em { color: var(--muted); font-style: normal; font-weight: 600; }
-.echoText { margin: 0; color: #e6ddf0; font-size: 14px; line-height: 1.75; }
-.compose { position: relative; padding: 14px; border: 2px dashed #65507680; background: #100a18; }
-.demoTag { position: absolute; top: -9px; right: 10px; padding: 1px 7px; background: var(--signal); color: #20162e; font: 900 10px var(--font-mono); letter-spacing: .08em; }
-.composeLine { margin: 0 0 10px; color: var(--signal); font: 700 12px var(--font-mono); }
-.composeInput { width: 100%; resize: none; padding: 10px 12px; border: 2px inset #746680; background: #0b0d12; color: var(--muted); font: 400 14px/1.6 var(--font-body); }
-.composeActions { display: flex; align-items: center; gap: 14px; margin-top: 12px; }
-.composeNote { color: var(--muted); font-size: 12px; }
 @media (max-width: 680px) {
   .cover { height: 190px; }
   .coverDial { border-width: 8px; }
-  .composeActions { flex-direction: column; align-items: flex-start; gap: 8px; }
   .backHint { display: none; }
 }

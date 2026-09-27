@@ -11,6 +11,8 @@ export interface PostSummary {
   issue: string;
   featured?: boolean;
   isDemo?: boolean;
+  // Placeholder covers live in /public/covers; swap src for real imagery later.
+  cover?: { src: string; alt: string };
 }
 
 // The UI consumes this shape, not the storage source. A future CMS adapter can
@@ -27,6 +29,7 @@ export const posts: PostSummary[] = [
     issue: "001",
     featured: true,
     isDemo: true,
+    cover: { src: "/covers/signal-001.svg", alt: "铬面旋钮与轨道环构成的占位封面" },
   },
   {
     id: "signal-002",
@@ -38,6 +41,7 @@ export const posts: PostSummary[] = [
     readingMinutes: 5,
     issue: "002",
     isDemo: true,
+    cover: { src: "/covers/signal-002.svg", alt: "凸起与按压状态按钮构成的占位封面" },
   },
   {
     id: "signal-003",
@@ -49,6 +53,7 @@ export const posts: PostSummary[] = [
     readingMinutes: 4,
     issue: "003",
     isDemo: true,
+    cover: { src: "/covers/signal-003.svg", alt: "雨夜霓虹竖招牌构成的占位封面" },
   },
   {
     id: "signal-004",

@@ -1,7 +1,21 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import type { Channel } from "./ChannelKnob";
 import styles from "./QueryTerminal.module.css";
+
+/**
+ * Query script shared by the home console and the archive index page, so the
+ * playedScripts cache hits across both routes. `hydrate` customizes the last
+ * line per surface ("cards --skin=win98" on home, "rows --skin=index" here).
+ */
+export const scriptFor = (ch: Channel, hydrate = "cards --skin=win98") => [
+  "open archive.db --mode=ro",
+  `query --channel=${ch} --sort=date.desc --limit=12`,
+  `hydrate ${hydrate}`,
+];
+
+export const scriptKey = (ch: Channel, hydrate?: string) => scriptFor(ch, hydrate).join("\n");
 
 /**
  * Scripts that finished typing once (per browser session, module scope) are
