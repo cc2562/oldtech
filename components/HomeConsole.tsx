@@ -18,16 +18,18 @@ import styles from "./HomeConsole.module.css";
 
 export function HomeConsole({ posts, author, site }: { posts: PostSummary[]; author: string; site: SiteData }) {
   const [channel, setChannel] = useState<Channel>("全部");
+  // Terminal scripts quote the configured display count (后台 → 列表设置).
+  const scriptOptions = { limit: site.homeJournalLimit };
   // Returning from an article (client-side nav) skips the query animation:
   // if this channel's script already played, cards are visible immediately.
-  const [ready, setReady] = useState(() => hasQueryPlayed(scriptKey("全部")));
+  const [ready, setReady] = useState(() => hasQueryPlayed(scriptKey("全部", scriptOptions)));
   const visiblePosts = channel === "全部" ? posts : posts.filter((post) => post.category === channel);
   const featured = channel === "全部" ? visiblePosts.find((post) => post.featured) ?? visiblePosts[0] : visiblePosts[0];
   const rest = visiblePosts.filter((post) => post.id !== featured?.id);
 
   const handleChannelChange = (next: Channel) => {
     if (next === channel) return;
-    setReady(hasQueryPlayed(scriptKey(next)));
+    setReady(hasQueryPlayed(scriptKey(next, scriptOptions)));
     setChannel(next);
   };
 
@@ -70,7 +72,7 @@ export function HomeConsole({ posts, author, site }: { posts: PostSummary[]; aut
 
       <section id="journal" className={styles.journal} aria-labelledby="journal-title">
         <div className={styles.journalHeader}><div><p>01 // PERSONAL ARCHIVE</p><h2 id="journal-title">最近的信号<span>_</span></h2></div><div className={styles.journalReadout} aria-live="polite">当前频道 <strong>{channel}</strong><br />检索结果 <strong>{String(visiblePosts.length).padStart(2, "0")}</strong> 条</div></div>
-        <QueryTerminal lines={scriptFor(channel)} result={`${String(visiblePosts.length).padStart(2, "0")} records`} onComplete={() => setReady(true)} />
+        <QueryTerminal lines={scriptFor(channel, scriptOptions)} result={`${String(visiblePosts.length).padStart(2, "0")} records`} onComplete={() => setReady(true)} />
         {!ready && <IndexLoader label="LATEST_SIGNALS.DAT" />}
         <div className={styles.journalBody} data-ready={ready || undefined}>
           {!featured && <p>这个频道还没有已发布文章。</p>}

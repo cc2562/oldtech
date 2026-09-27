@@ -4,18 +4,25 @@ import { useEffect, useRef, useState } from "react";
 import type { Channel } from "./ChannelKnob";
 import styles from "./QueryTerminal.module.css";
 
+export type QueryScriptOptions = {
+  /** Row/card limit, taken from the admin «列表设置» so the script stays truthful. */
+  limit: number;
+  /** Last script line: "cards --skin=win98" on home, "rows --skin=index" on the archive. */
+  hydrate?: string;
+};
+
 /**
  * Query script shared by the home console and the archive index page, so the
- * playedScripts cache hits across both routes. `hydrate` customizes the last
- * line per surface ("cards --skin=win98" on home, "rows --skin=index" here).
+ * playedScripts cache hits across both routes. The limit mirrors the configured
+ * display count, and `hydrate` customizes the last line per surface.
  */
-export const scriptFor = (ch: Channel, hydrate = "cards --skin=win98") => [
+export const scriptFor = (ch: Channel, { limit, hydrate = "cards --skin=win98" }: QueryScriptOptions) => [
   "open archive.db --mode=ro",
-  `query --channel=${ch} --sort=date.desc --limit=12`,
+  `query --channel=${ch} --sort=date.desc --limit=${limit}`,
   `hydrate ${hydrate}`,
 ];
 
-export const scriptKey = (ch: Channel, hydrate?: string) => scriptFor(ch, hydrate).join("\n");
+export const scriptKey = (ch: Channel, options: QueryScriptOptions) => scriptFor(ch, options).join("\n");
 
 /**
  * Scripts that finished typing once (per browser session, module scope) are

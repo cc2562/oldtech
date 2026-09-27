@@ -33,7 +33,19 @@
 }
 .rows li { list-style: none; }
 .rows li + li { border-top: 1px solid var(--line); }
+/* Only newly mounted rows animate, so each "load more" batch slides in. */
+.rows li { animation: rowIn .34s steps(3, end) 1; }
+@keyframes rowIn {
+  0% { opacity: 0; transform: translateY(7px); }
+  60% { opacity: 1; transform: translateY(-2px); }
+  100% { opacity: 1; transform: none; }
+}
 .empty { margin: 0; padding: 26px 18px; border: 2px inset #746680; background: #0b0d12; color: var(--signal); font: 700 13px var(--font-mono); }
+/* Load more: terminal script above a beveled button plus a live readout. */
+.more { margin-top: 14px; }
+.moreRow { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.moreReadout { margin: 0; color: var(--muted); font: 700 11px/1.6 var(--font-mono); letter-spacing: .05em; }
+.moreEnd { margin: 14px 0 0; color: var(--muted); font: 700 11px var(--font-mono); letter-spacing: .05em; }
 @media (max-width: 680px) {
   .page { padding-top: 12px; }
   .head { padding: 16px 15px; }

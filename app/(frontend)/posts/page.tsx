@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { PostsArchive } from "@/components/PostsArchive";
-import { getPublishedPosts } from '@/lib/cms';
+import { getPublishedPosts, getSite } from '@/lib/cms';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,6 +10,7 @@ export const metadata: Metadata = {
 };
 
 export default async function PostsPage() {
-  const posts = await getPublishedPosts();
-  return <PostsArchive posts={posts} />;
+  // Batch size comes from the admin (后台 → 站点管理 → 列表设置).
+  const [posts, site] = await Promise.all([getPublishedPosts(), getSite()]);
+  return <PostsArchive posts={posts} batchSize={site.archiveBatchSize} />;
 }

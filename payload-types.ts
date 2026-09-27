@@ -197,6 +197,9 @@ export interface Media {
 export interface Post {
   id: number;
   title: string;
+  /**
+   * 仅小写英文字母、数字和连字符。留空保存时会自动生成一串 ID，之后可随时改成更好记的地址。
+   */
   slug: string;
   /**
    * 可选；留空时保存文章会自动截取正文前 80 字。
@@ -541,6 +544,14 @@ export interface SiteSetting {
       }[]
     | null;
   requireCommentApproval?: boolean | null;
+  /**
+   * 首页“最近的信号”最多展示的已发布文章数量；完整档案仍在文章档案页。
+   */
+  homeJournalLimit: number;
+  /**
+   * 文章档案页首批显示、以及每次点击“加载更多”追加的条数。
+   */
+  archiveBatchSize: number;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -563,6 +574,8 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         id?: T;
       };
   requireCommentApproval?: T;
+  homeJournalLimit?: T;
+  archiveBatchSize?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

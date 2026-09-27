@@ -6,3 +6,4 @@ out/
 *.tsbuildinfo
 media/
 .playwright-cli/
+public/vditor/

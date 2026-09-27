@@ -2,8 +2,9 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
-import { buildConfig, ValidationError, type CollectionConfig, type GlobalConfig } from 'payload'
+import { buildConfig, ValidationError, type CollectionConfig, type GlobalConfig, type PayloadRequest } from 'payload'
 import sharp from 'sharp'
+import { randomSlug, timestampedSlug } from './lib/slug'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 const adminOnly = ({ req }: { req: { user?: unknown } }) => Boolean(req.user)
@@ -47,6 +48,26 @@ function markdownToPlainText(value: unknown): string {
     .replace(/[|*_~]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim()
+}
+
+/**
+ * Picks a slug nobody has used yet, so leaving the field empty stays safe even
+ * though the column is unique. Access is overridden because drafts are not
+ * readable by the public and would otherwise be invisible to this check.
+ */
+async function unusedSlug(req: PayloadRequest): Promise<string> {
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const candidate = randomSlug()
+    const existing = await req.payload.find({
+      collection: 'posts',
+      where: { slug: { equals: candidate } },
+      limit: 1,
+      depth: 0,
+      overrideAccess: true,
+    })
+    if (existing.docs.length === 0) return candidate
+  }
+  return timestampedSlug()
 }
 
 function excerptFromText(text: string) {
@@ -95,8 +116,12 @@ const Posts: CollectionConfig = {
     create: adminOnly, update: adminOnly, delete: adminOnly,
   },
   hooks: {
-    beforeValidate: [({ data, originalDoc }) => {
+    beforeValidate: [async ({ data, originalDoc, req }) => {
       if (!data) return data
+      // Auto slug: an empty field (create or cleared on update) is filled with a
+      // generated id here, which runs before the `required`/`unique` checks.
+      const incomingSlug = typeof data.slug === 'string' ? data.slug.trim() : data.slug
+      data.slug = incomingSlug || await unusedSlug(req)
       const markdown = data.bodyMarkdown ?? originalDoc?.bodyMarkdown
       const body = data.body ?? originalDoc?.body
       // Markdown takes priority for derived values when both are present,
@@ -120,7 +145,7 @@ const Posts: CollectionConfig = {
   },
   fields: [
     { name: 'title', type: 'text', required: true, maxLength: 160 },
-    { name: 'slug', type: 'text', required: true, unique: true, index: true, validate: (value: unknown) => typeof value === 'string' && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value) ? true : '使用小写英文字母、数字和连字符' },
+    { name: 'slug', type: 'text', required: true, unique: true, index: true, admin: { description: '仅小写英文字母、数字和连字符。留空保存时会自动生成一串 ID，之后可随时改成更好记的地址。', placeholder: '留空自动生成 ID' }, validate: (value: unknown) => typeof value === 'string' && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value) ? true : '使用小写英文字母、数字和连字符' },
     { name: 'excerpt', type: 'textarea', maxLength: 400, admin: { description: '可选；留空时保存文章会自动截取正文前 80 字。' } },
     { name: 'category', type: 'select', required: true, options: ['技术', '设计', '生活'] },
     { name: 'issue', type: 'text', required: true, unique: true, maxLength: 12 },
@@ -129,7 +154,10 @@ const Posts: CollectionConfig = {
     { name: 'readingMinutes', type: 'number', required: true, min: 1, max: 999, admin: { readOnly: true, description: '根据正文长度自动计算。' } },
     { name: 'cover', type: 'upload', relationTo: 'media' },
     { name: 'body', type: 'richText' },
-    { name: 'bodyMarkdown', label: 'Markdown 正文', type: 'textarea', admin: { description: '与富文本正文二选一；填写后前台优先渲染 Markdown（支持 GFM 表格、任务列表、删除线与代码高亮，图片写法 ![说明](图片地址)）。' } },
+    { name: 'bodyMarkdown', label: 'Markdown 正文', type: 'textarea', admin: {
+      description: '与富文本正文二选一；填写后前台优先渲染 Markdown（支持 GFM 表格、任务列表、删除线与代码高亮，图片写法 ![说明](图片地址)）。',
+      components: { Field: '@/components/admin/MarkdownEditor#MarkdownEditorField' },
+    } },
     { name: 'pullQuote', type: 'textarea' },
   ],
 }
@@ -198,6 +226,12 @@ const SiteSettings: GlobalConfig = {
       ] },
       { label: '评论设置', fields: [
         { name: 'requireCommentApproval', label: '新评论需要审核', type: 'checkbox', defaultValue: true },
+      ] },
+      { label: '列表设置', fields: [
+        { name: 'homeJournalLimit', label: '首页最近信号条数', type: 'number', required: true, defaultValue: 8, min: 1, max: 48,
+          admin: { description: '首页“最近的信号”最多展示的已发布文章数量；完整档案仍在文章档案页。' } },
+        { name: 'archiveBatchSize', label: '档案页每批条数', type: 'number', required: true, defaultValue: 5, min: 1, max: 50,
+          admin: { description: '文章档案页首批显示、以及每次点击“加载更多”追加的条数。' } },
       ] },
     ] },
   ],

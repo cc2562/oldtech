@@ -86,7 +86,7 @@ export default async function ComponentsPage() {
           <TerminalStatus typewriter lines={["mount /archive", "connect personal_signal"]} />
         </div>
         <div className={styles.termDemo}>
-          <QueryTerminal lines={["open archive.db --mode=ro", "query --channel=全部 --sort=date.desc --limit=12", "hydrate cards --skin=win98"]} result="04 records · DEMO DATA" />
+          <QueryTerminal lines={["open archive.db --mode=ro", "query --channel=全部 --sort=date.desc --limit=8", "hydrate cards --skin=win98"]} result="04 records · DEMO DATA" />
         </div>
       </section>
 

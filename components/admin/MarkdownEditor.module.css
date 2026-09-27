@@ -1,0 +1,99 @@
+/* The Payload admin bundle does not load app/globals.css, so the console
+   palette is mirrored here instead of relying on the site's CSS variables.
+   Values match the :root tokens (signal yellow, EVA violet, chrome, night). */
+.wrap {
+  --mk-signal: #f4ed18;
+  --mk-violet: #8244c7;
+  --mk-violet-bright: #b78af0;
+  --mk-panel: #150e1f;
+  --mk-panel-raised: #1d1430;
+  --mk-sunken: #100c17;
+  --mk-line: #554262;
+  --mk-paper: #f4f0fb;
+  --mk-muted: #b6a9c8;
+  margin-bottom: 26px;
+}
+.label { display: block; margin-bottom: 4px; color: var(--mk-paper); font-weight: 600; }
+.description { margin: 0 0 10px; color: var(--mk-muted); font-size: 13px; line-height: 1.7; }
+.hint { margin: 8px 0 0; color: var(--mk-muted); font-size: 12px; line-height: 1.6; }
+.error { margin: 8px 0 0; color: var(--mk-signal); font-size: 13px; font-weight: 600; }
+.readOnly { margin: 0; padding: 14px 16px; border: 2px inset var(--mk-line); background: var(--mk-sunken); color: var(--mk-muted); font: 400 13px/1.8 var(--font-mono, ui-monospace), Consolas, monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
+.fallback { width: 100%; min-height: 380px; padding: 14px 16px; border: 2px inset var(--mk-line); background: var(--mk-sunken); color: var(--mk-paper); font: 400 14px/1.8 var(--font-mono, ui-monospace), Consolas, monospace; resize: vertical; }
+.fallback:focus-visible { outline: 3px solid var(--mk-signal); outline-offset: 2px; }
+
+.editor { border: 2px inset var(--mk-line); background: var(--mk-panel); }
+.wrap[data-error] .editor { border-color: var(--mk-signal); }
+
+/* ---- Vditor dark theme, restyled to the site console palette ---- */
+.editor :global(.vditor) { border: 0; background: transparent; }
+.editor :global(.vditor-toolbar) { padding: 4px 6px; background: var(--mk-panel-raised); border-bottom: 1px solid var(--mk-line); }
+.editor :global(.vditor-toolbar__item) { padding: 3px; }
+.editor :global(.vditor-toolbar__item svg) { width: 16px; height: 16px; color: var(--mk-muted); }
+.editor :global(.vditor-toolbar__item--current svg),
+.editor :global(.vditor-toolbar__item:hover svg) { color: var(--mk-signal); }
+.editor :global(.vditor-toolbar__divider) { border-left: 1px solid var(--mk-line); }
+.editor :global(.vditor-toolbar .vditor-toolbar__item--current) { background: #2b1b40; }
+
+.editor :global(.vditor-content),
+.editor :global(.vditor-ir) { background: transparent; }
+.editor :global(.vditor-reset) { padding: 20px 22px; color: var(--mk-paper); font-family: "Noto Sans SC", "Microsoft YaHei", "PingFang SC", sans-serif; font-size: 15px; line-height: 1.85; }
+.editor :global(.vditor-reset h1),
+.editor :global(.vditor-reset h2),
+.editor :global(.vditor-reset h3),
+.editor :global(.vditor-reset h4) { color: #f8f6ff; }
+.editor :global(.vditor-reset h2) { padding-bottom: 8px; border-bottom: 4px double #ac9eb9; }
+.editor :global(.vditor-reset a) { color: var(--mk-signal); }
+.editor :global(.vditor-reset blockquote) { border-left: 3px solid var(--mk-violet-bright); background: #8244c71a; color: #ead9f5; }
+.editor :global(.vditor-reset hr) { border: 0; border-top: 4px double #ac9eb9; }
+.editor :global(.vditor-reset code:not(.hljs)) { padding: 1px 5px; border: 1px solid var(--mk-line); background: #2e2139; color: var(--mk-signal); }
+.editor :global(.vditor-reset pre) { border: 2px inset #746680; background: var(--mk-sunken); }
+.editor :global(.vditor-reset table td),
+.editor :global(.vditor-reset table th) { border-color: var(--mk-line); }
+.editor :global(.vditor-ir__marker) { color: var(--mk-violet-bright); }
+.editor :global(.vditor-ir__marker--heading),
+.editor :global(.vditor-ir__marker--link) { color: var(--mk-signal); }
+.editor :global(.vditor-panel) { border: 1px solid var(--mk-line); background: var(--mk-panel-raised); color: var(--mk-paper); }
+.editor :global(.vditor-panel a),
+.editor :global(.vditor-panel input) { color: var(--mk-paper); }
+.editor :global(.vditor-hint) { background: var(--mk-panel-raised); border: 1px solid var(--mk-line); }
+.editor :global(.vditor-hint button) { color: var(--mk-paper); }
+.editor :global(.vditor-hint button:hover) { color: var(--mk-signal); }
+.editor :global(.vditor-tip) { border: 1px solid var(--mk-line); background: #241736; color: var(--mk-paper); }
+.editor :global(.vditor-counter) { color: var(--mk-muted); background: transparent; }
+.editor :global(.vditor-resize) { border-top: 1px solid var(--mk-line); }
+
+/* Code highlighting: signal yellow, EVA violet and chrome only — no red. */
+.editor :global(.hljs) { background: transparent; color: #e4deea; }
+.editor :global(.hljs-comment),
+.editor :global(.hljs-quote) { color: #8d8199; font-style: italic; }
+.editor :global(.hljs-keyword),
+.editor :global(.hljs-literal),
+.editor :global(.hljs-selector-tag),
+.editor :global(.hljs-doctag),
+.editor :global(.hljs-name) { color: var(--mk-signal); }
+.editor :global(.hljs-string),
+.editor :global(.hljs-attr),
+.editor :global(.hljs-regexp),
+.editor :global(.hljs-addition),
+.editor :global(.hljs-selector-attr),
+.editor :global(.hljs-selector-pseudo) { color: var(--mk-violet-bright); }
+.editor :global(.hljs-number),
+.editor :global(.hljs-symbol),
+.editor :global(.hljs-bullet),
+.editor :global(.hljs-link),
+.editor :global(.hljs-meta) { color: #fff88b; }
+.editor :global(.hljs-title),
+.editor :global(.hljs-section) { color: #f5edff; font-weight: 700; }
+.editor :global(.hljs-built_in),
+.editor :global(.hljs-type),
+.editor :global(.hljs-class) { color: #c0c6d4; }
+.editor :global(.hljs-variable),
+.editor :global(.hljs-template-variable),
+.editor :global(.hljs-params),
+.editor :global(.hljs-property) { color: #ead9f5; }
+.editor :global(.hljs-deletion) { color: var(--mk-violet); }
+
+@media (max-width: 720px) {
+  .editor :global(.vditor-toolbar) { flex-wrap: wrap; }
+  .editor :global(.vditor-reset) { padding: 14px; }
+}

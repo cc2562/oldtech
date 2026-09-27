@@ -4,7 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "predev": "node scripts/sync-vditor-assets.mjs",
     "dev": "next dev --webpack",
+    "prebuild": "node scripts/sync-vditor-assets.mjs",
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
@@ -23,7 +25,8 @@
     "react-markdown": "^10.1.0",
     "rehype-highlight": "^7.0.2",
     "remark-gfm": "^4.0.1",
-    "sharp": "^0.35.4"
+    "sharp": "^0.35.4",
+    "vditor": "^4.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
