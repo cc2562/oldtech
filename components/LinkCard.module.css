@@ -1,0 +1,108 @@
+/* Web-style card living inside the LinkBrowser viewport. Kept visually
+   lighter than the surrounding Win98 window: thin border, dark panel. */
+.card {
+  position: relative;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 14px 12px;
+  border: 1px solid #8a6ca0b3;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(180deg, #241a33, #1a1226 70%);
+  box-shadow: inset 1px 1px 0 #ffffff14, 3px 4px 0 #060409;
+  color: var(--paper);
+  transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+}
+.card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: repeating-linear-gradient(0deg, #f4ed1826 0 2px, transparent 2px 5px);
+}
+.card:hover {
+  border-color: var(--signal);
+  box-shadow: inset 1px 1px 0 #ffffff1f, 3px 4px 0 #060409, 0 0 18px #f4ed1838;
+  animation: cardGlitch .32s steps(2, end) 1;
+}
+.card:hover::after { animation: glitchFlash .32s steps(2, end) 1; }
+.card:hover .name { color: var(--signal); animation: textGlitch .32s steps(2, end) 1; }
+.card:hover .iconBox {
+  background: linear-gradient(180deg, #fff98c, var(--signal) 55%, #c8b403);
+  color: #20162e;
+  text-shadow: none;
+}
+.card:focus-visible { outline: 3px solid var(--signal); outline-offset: 3px; }
+
+.head { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.iconBox {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #6c5a83;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(180deg, #4b2769, #24142f);
+  color: var(--violet-bright);
+  font: 900 16px var(--font-mono);
+  text-shadow: 1px 1px #120a1c;
+  transition: background .18s ease, color .18s ease;
+}
+.fileNo {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #cbbddd;
+  font: 700 10px var(--font-mono);
+  letter-spacing: .06em;
+}
+.demo {
+  flex: none;
+  margin-left: auto;
+  padding: 1px 5px;
+  border: 1px solid #8d8400;
+  background: #f4ed1814;
+  color: var(--signal);
+  font: 800 9px/1.6 var(--font-mono);
+  letter-spacing: .08em;
+}
+.name { margin: 0; color: #f1eaf8; font-size: 19px; line-height: 1.35; letter-spacing: -.01em; }
+.desc { margin: 0; color: #ddd0e8; font-size: 13.5px; line-height: 1.7; }
+.domain {
+  margin: auto 0 0;
+  padding-top: 8px;
+  border-top: 1px dashed #65507666;
+  color: #b3a3c9;
+  font: 700 11px/1.5 var(--font-mono);
+  overflow-wrap: anywhere;
+}
+.arrow { margin-right: 6px; color: var(--signal); }
+
+@keyframes cardGlitch {
+  0% { transform: translate(0); }
+  20% { transform: translate(-2px, 1px) skewX(-.6deg); }
+  40% { transform: translate(2px, -1px); }
+  60% { transform: translate(-1px, 0) skewX(.5deg); }
+  80% { transform: translate(1px, 1px); }
+  100% { transform: translate(0); }
+}
+@keyframes glitchFlash {
+  0% { opacity: .9; transform: translateY(-4px); }
+  50% { opacity: .5; transform: translateY(3px); }
+  100% { opacity: 0; transform: translateY(0); }
+}
+@keyframes textGlitch {
+  0% { text-shadow: -2px 0 var(--signal), 2px 0 var(--violet); }
+  50% { text-shadow: 2px 0 var(--signal), -2px 0 var(--violet-bright); }
+  100% { text-shadow: 1px 1px #2c1546; }
+}
+
+@media (max-width: 480px) {
+  .card { padding: 12px; }
+  .name { font-size: 17px; }
+}

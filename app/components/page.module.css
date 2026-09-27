@@ -32,6 +32,7 @@
 .typeBody { max-width: 650px; font-size: 16px; line-height: 1.8; }
 .typeMono { color: var(--signal); font: 700 12px var(--font-mono); letter-spacing: .04em; }
 .cardPanel { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 22px; }
+.linkCardStack { min-width: 0; display: grid; gap: 16px; align-content: start; }
 .cardNotes { padding: 32px; border: 2px dashed var(--line-strong); background: #25163385; }
 .systemGrid { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 18px; align-items: stretch; }
 .systemGrid h3 { margin: 3px 0 10px; font-size: clamp(23px,2.5vw,33px); }

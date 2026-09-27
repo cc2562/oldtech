@@ -1,0 +1,177 @@
+/* Simulated retro browser living inside one Win98 window shell. */
+.browser {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  border: 3px solid var(--win-border);
+  background: var(--win-face);
+  box-shadow: inset 2px 2px var(--win-bevel-hi), inset -2px -2px var(--win-bevel-lo), var(--win-drop);
+  color: #1b1324;
+}
+
+.titlebar {
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 5px 4px 8px;
+  background: var(--win-titlebar-bg);
+  color: #fff;
+  font: 800 12px var(--font-mono);
+  letter-spacing: .05em;
+}
+.icon { width: 19px; height: 19px; display: grid; place-items: center; background: var(--signal); color: #20162e; font-size: 12px; }
+.title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.controls { display: flex; flex: none; gap: 3px; margin-left: auto; }
+.controls i {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border: 1px solid #494251;
+  background: var(--win-control-bg);
+  box-shadow: inset 1px 1px #fff, inset -1px -1px #747080;
+  color: #211a2b;
+  font: normal 800 14px/1 sans-serif;
+}
+
+/* Tab strip */
+.tabs {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  margin: 6px 5px 0;
+  padding: 6px 6px 0;
+  border: 2px inset #87818e;
+  border-bottom: 0;
+  background: #a09aab;
+}
+.tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  padding: 5px 10px 4px;
+  border: 1px solid #494251;
+  border-bottom: 0;
+  background: var(--win-face);
+  box-shadow: inset 1px 1px #fff;
+  color: #241a30;
+  font: 800 11px var(--font-mono);
+  letter-spacing: .06em;
+}
+.tabDot { width: 7px; height: 7px; flex: none; border-radius: 50%; background: var(--violet); box-shadow: 0 0 5px #8244c7cc; }
+.tabClose { margin-left: 4px; color: #5c5368; font-weight: 800; }
+.tabTrack { flex: 1; align-self: stretch; box-shadow: inset 0 -2px 0 #7d7589; }
+
+/* Toolbar: decorative nav buttons + readout address field */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 5px;
+  padding: 7px 8px;
+  border: 2px inset #87818e;
+  border-top: 0;
+  background: var(--win-face);
+}
+.navBtns { display: flex; flex: none; gap: 4px; }
+.navBtn {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 24px;
+  border: 1px solid #494251;
+  background: var(--win-control-bg);
+  box-shadow: inset 1px 1px #fff, inset -1px -1px #747080;
+  color: #3c3448;
+  font-size: 11px;
+}
+.addressLabel { flex: none; color: #3c3448; font: 700 11px var(--font-mono); }
+.address {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 4px 8px;
+  border: 2px inset #87818e;
+  background: var(--win-body-bg);
+  color: var(--violet-bright);
+  font: 600 11.5px var(--font-mono);
+}
+.addressScheme { color: #8d8199; }
+.demoTag {
+  flex: none;
+  padding: 2px 6px;
+  border: 1px solid #8d8400;
+  background: #f4ed1822;
+  color: #4a3d15;
+  font: 800 9px/1.6 var(--font-mono);
+  letter-spacing: .08em;
+}
+
+/* Viewport holding the web-style cards */
+.viewport {
+  margin: 0 5px;
+  padding: 16px;
+  border: 2px inset #87818e;
+  border-top: 0;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 4px, #08050e1f 4px 5px),
+    radial-gradient(circle at 50% 0%, #2a1c3d, #140d1f 70%);
+}
+.viewportHead {
+  margin: 0 0 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed #65507666;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.viewportTitle { color: var(--signal); font: 800 11px var(--font-mono); letter-spacing: .08em; }
+.viewportNote { color: var(--muted); font: 600 10px var(--font-mono); }
+.grid {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr));
+  gap: 14px;
+}
+.cell { min-width: 0; display: flex; }
+
+/* Status bar */
+.statusbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 5px;
+  padding: 4px 8px;
+  border: 2px inset #87818e;
+  background: var(--win-face);
+  color: #4a4256;
+  font: 700 10px/1.8 var(--font-mono);
+  letter-spacing: .04em;
+}
+.statusLamp {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: var(--signal);
+  box-shadow: 0 0 6px #f4ed18cc;
+}
+
+@media (max-width: 600px) {
+  .viewport { padding: 12px; }
+  .addressLabel { display: none; }
+}
+@media (max-width: 390px) {
+  .title { font-size: 10.5px; }
+  .navBtn { width: 22px; }
+}

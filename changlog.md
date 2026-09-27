@@ -2,7 +2,26 @@
 
 本文件记录可见功能与设计方向的变化。项目仍是本地演示，版本号以 `package.json` 为准；以下记录不代表正式发布。
 
-## 2026-09-27（续 6）— 回声留言板：可编辑 UI 与发送终端（当前）
+## 2026-09-27（续 7）— 友情链接页：站长档案与模拟浏览器中继站（当前）
+
+### 新增
+
+- **友情链接页 `/links`**：两区块结构——`OPERATOR_PROFILE.EXE // 站长档案`（纯色占位头像面板：铬 ridge 边框 + 信号黄首字符 + `NO SIGNAL` 标注 + PWR/NET/RSS 状态灯；昵称与简介取自 `lib/site.ts`；拟物铬面社交按钮组带 DEMO 角标）与 `FRIEND_LINKS.EXE // 友链中继站`。
+- **模拟浏览器窗口 `LinkBrowser`**：单扇完整 Win98 窗口承载全部友链——标签页条（`RELAY_NET` 激活标签 + 紫色状态点）、工具行（◀ ▶ ⟳ 装饰按钮 + 只读地址读数窗 `http://neon-notes.local/links` + DEMO 角标）、凹陷视口与底部状态栏（READY 信号灯 + 收录数量）。
+- **网页卡片 `LinkCard`**：视口内的友链以「网页卡片」而非独立 Win98 窗口呈现——细描边、深底浅字，与外层金属边框拉开「窗口 > 浏览器 > 网页卡片」层级；图标色块 + `FRIEND_XXX.URL` 文件号 + DEMO 角标 + 站点名 + 描述 + 域名行（由 URL 自动提取）；整卡为外链新窗口打开；悬停亮黄高亮 + 故障抖动（位移/色差/扫描线），`focus-visible` 3px 信号黄焦点框。
+- **数据模块 `lib/links.ts`**：`FriendLink` 与 `SocialLink` 类型 + 演示数据（友链指向真实可访问站点、全部标注 `isDemo`），页面仅消费该类型，后续可由适配层替换数据源。
+- 站点导航新增「友情链接 03」，组件展台顺延为 04；展台眉题编号同步为 `04 / COMPONENT LAB`，并新增第 10 区「友链卡片」示例。
+
+### 响应式与可访问性
+
+- 视口内卡片 `repeat(auto-fill, minmax(250px, 1fr))` 网格，≤680px 单列；博主卡片桌面左右分栏、≤720px 上下堆叠；地址栏与小屏装饰元素自动隐藏/截断，320px 无横向溢出。
+- 社交按钮带 `aria-label`，外链均 `rel="noopener noreferrer"`；动效仅叠加于 hover/focus，减少动态效果下由全局规则压平。
+
+### 验证
+
+- `npm run typecheck` 与 `npm run build` 通过（含静态 `/links` 路由）。
+
+## 2026-09-27（续 6）— 回声留言板：可编辑 UI 与发送终端
 
 - 留言板提取为客户端组件 `EchoBoard`，移除编辑框与发送按钮的禁用态。聚焦编辑框后，下方以 grid-rows 动画展开 `> nick:`（必填）/ `> mail:` / `> site:` 三个终端风输入行。
 - 点击发送弹出内联发送终端：逐字打出 `auth --guest --nick=… → sign payload --bytes=N → transmit --to=ECHO_BOARD` 模拟脚本，完成后输出 `// ECHO_QUEUED` 并把评论追加到本地列表（带 `LOCAL` 角标与「刚刚 · LOCAL」时间戳，标注演示不持久化）；昵称或正文为空时输出 `// ERR 400 · NICK 与正文为必填项`，不追加。

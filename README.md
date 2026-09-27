@@ -13,7 +13,7 @@ npm install
 npm run dev
 ```
 
-打开 `http://localhost:3000` 查看首页，`/components` 查看组件展台。`npm run build` 验证生产构建，`npm run typecheck` 验证类型。
+打开 `http://localhost:3000` 查看首页，`/posts` 查看文章档案，`/links` 查看友情链接，`/components` 查看组件展台。`npm run build` 验证生产构建，`npm run typecheck` 验证类型。
 
 ## 技术与结构
 
@@ -21,6 +21,7 @@ npm run dev
 - CSS Modules 管理组件样式，`app/globals.css` 定义全站设计变量；不使用 Tailwind CSS。
 - `components/` 放复用界面组件，`lib/site.ts` 放可替换的站点身份资料。
 - `lib/posts.ts` 定义 `PostSummary` 与第一阶段的样例文章。页面仅消费这个类型，不直接依赖存储层。
+- `lib/links.ts` 定义 `FriendLink` 与 `SocialLink` 及演示数据，`/links` 友链页（站长档案卡片 + 模拟浏览器窗口中的友链卡片）仅消费这两个类型。
 
 首页文章卡片是静态演示，不会链接到尚未实现的详情页。首页的四档旋钮可点击档位、拖动指针，或聚焦后使用方向键、Home、End 切换频道；文章列表随之筛选。站点说明以原生对话框打开，支持 Esc 关闭。终端进度条只演示非阻塞的开机状态，不控制页面加载。组件展台展示这些控件与拟物按钮。
 

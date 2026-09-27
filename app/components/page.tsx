@@ -10,6 +10,8 @@ import { RetroWindow } from "@/components/RetroWindow";
 import { RetroLink } from "@/components/RetroButton";
 import { SiteInfoDialog } from "@/components/SiteInfoDialog";
 import { TerminalStatus } from "@/components/TerminalStatus";
+import { LinkCard } from "@/components/LinkCard";
+import { friendLinks } from "@/lib/links";
 import { posts } from "@/lib/posts";
 import styles from "./page.module.css";
 
@@ -26,7 +28,7 @@ export default function ComponentsPage() {
   return (
     <div className={styles.page}>
       <header className={styles.intro}>
-        <p className={styles.eyebrow}>02 / COMPONENT LAB</p>
+        <p className={styles.eyebrow}>04 / COMPONENT LAB</p>
         <h1>组件展台<span className={styles.cursor}>_</span></h1>
         <p>个人信号站的零件目录：金属窗口、实体旋钮、终端状态与有按压感的按钮。</p>
       </header>
@@ -101,6 +103,27 @@ export default function ComponentsPage() {
             <p className={styles.ambientCaption}>PIXEL FIELD — 像素点阵被光标推开并弹簧回位；触摸设备与“减少动态效果”下退化为静止点阵。</p>
           </div>
         </div>
+      </section>
+
+      <section className={styles.section} aria-labelledby="links-title">
+        <div className={styles.sectionTitle}><span>10</span><div><p>EXTERNAL RELAY</p><h2 id="links-title">友链卡片</h2></div></div>
+        <div className={styles.cardPanel}>
+          <div className={styles.linkCardStack}>
+            <LinkCard link={friendLinks[0]} />
+            <LinkCard link={friendLinks[3]} />
+          </div>
+          <div className={styles.cardNotes}>
+            <span className={styles.noteTag}>DEMO DATA</span>
+            <h3>住在浏览器窗口里的网页卡片。</h3>
+            <p>/links 中继站把友链装进一扇完整的模拟浏览器窗口（FRIEND_LINKS.EXE）：标签页、只读地址栏与凹陷视口。视口内的卡片是「网页卡片」而非又一扇 Win98 窗口——细描边、深底浅字，与外层金属边框拉开层级。</p>
+            <ul>
+              <li>悬停：亮黄高亮 + 故障抖动（位移 / 色差 / 扫描线）</li>
+              <li>focus-visible：3px 信号黄焦点框，键盘可达</li>
+              <li>整卡为外链，新窗口打开，演示站点均标注 DEMO</li>
+            </ul>
+          </div>
+        </div>
+        <p className={styles.ambientCaption}>LINK CARD — /links 友情链接页视口内的网页卡片；域名行由 URL 自动提取，长描述在 320px 宽度下不溢出。</p>
       </section>
     </div>
   );
