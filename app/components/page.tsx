@@ -4,7 +4,9 @@ import { ButtonDemo } from "@/components/ButtonDemo";
 import { ChannelDemo } from "@/components/ChannelDemo";
 import { HeroParticles } from "@/components/HeroParticles";
 import { PixelField } from "@/components/PixelField";
+import { QueryTerminal } from "@/components/QueryTerminal";
 import { RetroWindow } from "@/components/RetroWindow";
+import { RetroLink } from "@/components/RetroButton";
 import { SiteInfoDialog } from "@/components/SiteInfoDialog";
 import { TerminalStatus } from "@/components/TerminalStatus";
 import { posts } from "@/lib/posts";
@@ -47,7 +49,21 @@ export default function ComponentsPage() {
         <div className={styles.sectionTitle}><span>04</span><div><p>WINDOW SYSTEM</p><h2 id="window-title">窗口与终端</h2></div></div>
         <div className={styles.systemGrid}>
           <RetroWindow title="ARCHIVE_NOTICE.TXT" eyebrow="WINDOW 98 / PERSONAL FILE"><h3>界面正在调频。</h3><p>这是承载精选文章和系统消息的内容窗口。标题栏与边框负责表达年代感，正文仍以阅读为先。</p><div className={styles.windowAction}><SiteInfoDialog /></div></RetroWindow>
-          <TerminalStatus typewriter lines={["mount /archive", "connect personal_signal", "scan --channel=全部"]} />
+          <TerminalStatus typewriter lines={["mount /archive", "connect personal_signal"]} />
+        </div>
+        <div className={styles.termDemo}>
+          <QueryTerminal lines={["open archive.db --mode=ro", "query --channel=全部 --sort=date.desc --limit=12", "hydrate cards --skin=win98"]} result="04 records · DEMO DATA" />
+        </div>
+      </section>
+
+      <section className={styles.section} aria-labelledby="pjax-title">
+        <div className={styles.sectionTitle}><span>08</span><div><p>NAVIGATION</p><h2 id="pjax-title">导航转场</h2></div></div>
+        <div className={styles.navPanel}>
+          <p>站内链接由 PJAX 系统接管：点击后页面中央出现 NAV.SYS 终端，跑完代码再完成跳转；浏览器前进后退会播放短版 restore 脚本。点击下面的按钮亲身体验。</p>
+          <div className={styles.navActions}>
+            <RetroLink href="/">演示：返回首页 ↗</RetroLink>
+            <RetroLink href={`/posts/${posts[0].slug}`} variant="violet">演示：打开文章 ↗</RetroLink>
+          </div>
         </div>
       </section>
 

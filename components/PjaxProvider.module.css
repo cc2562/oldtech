@@ -1,0 +1,27 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-transition);
+  display: grid;
+  place-items: center;
+  background: #0b0811f2;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  opacity: 1;
+  transition: opacity .18s ease;
+}
+.overlay.leaving { opacity: 0; }
+.window {
+  width: min(520px, 92vw);
+  border: 3px ridge #a09aaa;
+  background: #0b0d12;
+  box-shadow: 0 18px 60px #050308, 0 0 40px #8244c733;
+  font: 700 13px/1.7 var(--font-mono);
+}
+.titlebar { display: flex; justify-content: space-between; gap: 10px; padding: 6px 12px; background: var(--win-titlebar-bg); color: #fff; font: 800 11px var(--font-mono); letter-spacing: .08em; }
+.busy { color: var(--signal); }
+.termBody { min-height: 120px; padding: 14px 16px; color: var(--paper); }
+.line { margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cursor { color: var(--signal); animation: blink 1s steps(1, end) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .cursor { animation: none; } }

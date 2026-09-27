@@ -7,8 +7,8 @@ import styles from "./PixelField.module.css";
 const STRIDE = 6; // homeX, homeY, offsetX, offsetY, velX, velY
 const BASE: readonly [number, number, number] = [170, 166, 182];
 const SIGNAL: readonly [number, number, number] = [244, 237, 24];
-const VIOLET: readonly [number, number, number] = [183, 138, 240];
 const LEVELS = 8;
+const SHOW_RADIUS_RATIO = 1.6; // visibility halo = pushRadius * ratio, eased by vis
 
 function buildPalette(target: readonly [number, number, number]) {
   const palette: string[] = [];
@@ -22,8 +22,8 @@ function buildPalette(target: readonly [number, number, number]) {
   return palette;
 }
 
+// Pixels are only visible inside the cursor halo, tinted signal yellow.
 const SIGNAL_PALETTE = buildPalette(SIGNAL);
-const VIOLET_PALETTE = buildPalette(VIOLET);
 
 type FieldState = {
   ctx: CanvasRenderingContext2D;
@@ -39,7 +39,7 @@ type FieldState = {
   targetY: number;
   pushing: boolean;
   interactive: boolean;
-  drewStatic: boolean;
+  vis: number;
 };
 
 export function PixelField({
@@ -77,7 +77,7 @@ export function PixelField({
       interactive:
         !window.matchMedia("(hover: none)").matches &&
         !window.matchMedia("(pointer: coarse)").matches,
-      drewStatic: false,
+      vis: 0,
     };
     stateRef.current = state;
 
@@ -109,7 +109,6 @@ export function PixelField({
       }
       state.points = points;
       state.count = cols * rows;
-      state.drewStatic = false;
     };
     rebuild();
 
@@ -144,13 +143,7 @@ export function PixelField({
 
   useRafLoop(() => {
     const s = stateRef.current;
-    if (!s) return;
-
-    // Touch / no-hover devices never animate: draw the resting grid once.
-    if (!s.interactive) {
-      if (s.drewStatic) return;
-      s.drewStatic = true;
-    }
+    if (!s || !s.interactive) return;
 
     if (s.pushing) {
       if (s.cursorX < -1e8) {
@@ -160,10 +153,15 @@ export function PixelField({
       s.cursorX += (s.targetX - s.cursorX) * 0.2;
       s.cursorY += (s.targetY - s.cursorY) * 0.2;
     }
+    // Halo eases in around the cursor and shrinks away on pointer leave.
+    s.vis += ((s.pushing ? 1 : 0) - s.vis) * 0.12;
 
     const { ctx, points, count, dpr } = s;
     ctx.clearRect(0, 0, s.canvas.width, s.canvas.height);
     const radiusSq = pushRadius * pushRadius;
+    const showRadius = pushRadius * SHOW_RADIUS_RATIO * s.vis;
+    if (showRadius < 4) return;
+    const showSq = showRadius * showRadius;
     const size = 2 * dpr;
     let lastFill = "";
 
@@ -175,16 +173,17 @@ export function PixelField({
       let vx = points[i + 4];
       let vy = points[i + 5];
 
-      if (s.pushing) {
-        const dx = hx + ox - s.cursorX;
-        const dy = hy + oy - s.cursorY;
-        const distSq = dx * dx + dy * dy;
-        if (distSq < radiusSq && distSq > 0.01) {
-          const dist = Math.sqrt(distSq);
-          const force = (1 - dist / pushRadius) * 2.4;
-          vx += (dx / dist) * force;
-          vy += (dy / dist) * force;
-        }
+      const px = hx + ox;
+      const py = hy + oy;
+      const dx = px - s.cursorX;
+      const dy = py - s.cursorY;
+      const distSq = dx * dx + dy * dy;
+
+      if (s.pushing && distSq < radiusSq && distSq > 0.01) {
+        const dist = Math.sqrt(distSq);
+        const force = (1 - dist / pushRadius) * 2.4;
+        vx += (dx / dist) * force;
+        vy += (dy / dist) * force;
       }
 
       vx += -0.06 * ox;
@@ -206,14 +205,18 @@ export function PixelField({
       points[i + 4] = vx;
       points[i + 5] = vy;
 
+      // Only pixels inside the cursor halo are drawn, always signal yellow.
+      if (distSq >= showSq) continue;
+      const proximity = 1 - Math.sqrt(distSq) / showRadius;
       const mag = Math.abs(ox) + Math.abs(oy);
-      const level = mag >= 20 ? LEVELS - 1 : Math.floor((mag / 20) * LEVELS);
-      const fill = (p % 5 === 0 ? VIOLET_PALETTE : SIGNAL_PALETTE)[Math.min(level, LEVELS - 1)];
+      const dispLevel = mag >= 20 ? LEVELS - 1 : Math.floor((mag / 20) * LEVELS);
+      const level = Math.min(LEVELS - 1, Math.max(Math.floor(proximity * LEVELS), dispLevel));
+      const fill = SIGNAL_PALETTE[level];
       if (fill !== lastFill) {
         ctx.fillStyle = fill;
         lastFill = fill;
       }
-      ctx.fillRect((hx + ox) * dpr - size / 2, (hy + oy) * dpr - size / 2, size, size);
+      ctx.fillRect(px * dpr - size / 2, py * dpr - size / 2, size, size);
     }
   });
 

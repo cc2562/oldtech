@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { PixelField } from "@/components/PixelField";
+import { PjaxProvider } from "@/components/PjaxProvider";
 import { SiteHeader } from "@/components/SiteHeader";
 import { site } from "@/lib/site";
 import "./globals.css";
@@ -19,7 +20,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body>
         <div className="site-frame">
           <SiteHeader />
-          <main id="main-content">{children}</main>
+          <main id="main-content" tabIndex={-1}>{children}</main>
           <footer className="site-footer">
             <p className="footer-line"><span className="footer-prompt">{"C:\\NEON\\NOTES>"}</span> logoff --user=visitor</p>
             <p className="footer-line muted">© 2026 {site.name} · 一份正在成形的个人博客 / DESIGN DEMO · SESSION CLOSED</p>
@@ -27,6 +28,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           </footer>
         </div>
         <PixelField />
+        <PjaxProvider />
       </body>
     </html>
   );

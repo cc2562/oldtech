@@ -1,9 +1,28 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRafLoop } from "@/hooks/useRafLoop";
 import styles from "./TerminalStatus.module.css";
 
 const DEFAULT_LINES = ["mount /archive", "connect personal_signal"];
+
+function ClockLine() {
+  const valueRef = useRef<HTMLSpanElement | null>(null);
+
+  useRafLoop(() => {
+    const now = new Date();
+    const pad = (n: number, len = 2) => String(n).padStart(len, "0");
+    if (valueRef.current) {
+      valueRef.current.textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}.${pad(now.getMilliseconds(), 3)}`;
+    }
+  });
+
+  return (
+    <p className={styles.clockLine}>
+      <span>&gt;</span> SYS.TIME <b ref={valueRef}>--:--:--.---</b>
+    </p>
+  );
+}
 
 function BootLine() {
   const trackRef = useRef<HTMLSpanElement | null>(null);
@@ -46,6 +65,7 @@ function StaticTerminal({ compact }: { compact: boolean }) {
       <p><span>&gt;</span> mount /archive <b>[ OK ]</b></p>
       <p><span>&gt;</span> connect personal_signal <b>[ OK ]</b></p>
       <BootLine />
+      <ClockLine />
       <p className={styles.prompt}>{"C:\\NEON\\NOTES>"}<span className={styles.cursor} aria-hidden="true">_</span></p>
     </div>
   );
@@ -132,6 +152,7 @@ function TypewriterTerminal({ compact, lines, onComplete }: { compact: boolean; 
       {finished && (
         <>
           <BootLine />
+          <ClockLine />
           <p className={styles.prompt}>{"C:\\NEON\\NOTES>"}<span className={styles.cursor} aria-hidden="true">_</span></p>
         </>
       )}

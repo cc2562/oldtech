@@ -2,7 +2,35 @@
 
 本文件记录可见功能与设计方向的变化。项目仍是本地演示，版本号以 `package.json` 为准；以下记录不代表正式发布。
 
-## 2026-09-27 — 信号增强：环境动效、Win98 卡片与终端氛围（当前）
+## 2026-09-27（续）— 光标与氛围收敛（当前）
+
+- 自定义鼠标指针：全站替换为荧光绿像素 X（16×16 SVG data-URI，深色投影，中心热点），覆盖所有链接与控件。
+- 全站像素点阵收敛为「光标光晕」：静止粒子不再常显，只在光标周围约 160px 范围内显示信号黄粒子，亮度随距离衰减，光标离开视口时光晕收缩消失；页面背景恢复干净。
+- 检索终端不再重复播放：脚本按内容缓存（模块级 Set），从文章详情返回首页、或切回已浏览过的频道时，终端直接显示完成态、文章列表立即可见，不再重跑 `open archive.db → query → hydrate` 动画。
+
+## 2026-09-27 — 系统扩展：PJAX 导航、文章详情页与悬浮仪器条
+
+### 新增
+
+- **PJAX 转场系统**（`components/PjaxProvider.tsx`）：全局捕获期拦截站内链接点击，页面中央弹出 NAV.SYS 终端逐行跑代码（按目标路由动态生成，如 `> open POST_001.LOG [ OK ]`），完成后 `router.push`；浏览器前进/后退播放短版 restore 脚本；5 秒未完成自动硬跳兜底；减少动态效果下瞬显瞬消。后续所有页面无刷新加载均由该系统接管，无需逐页接线。
+- **文章详情页** `/posts/[slug]`：三区块结构——`SIGNAL_COVER.EXE // 信号封面`（放大版轨道环 + 铬面 dial 封面视觉 + 标题元信息 + `> cd ../archive` 返回链接）、`SIGNAL_BODY // 正文信号`（680px 克制阅读区 + 黄色引文块）、`ECHO_BOARD.EXE // 回声留言板`（终端化评论列表 + 禁用态发表框与 DEMO 标注）。`generateStaticParams` 静态产出 4 条路由；数据来自新模块 `lib/postDetails.ts`（`PostDetail extends PostSummary`，`lib/posts.ts` 与卡片接口零改动）。
+- 文章卡片整卡包 `next/link` 指向详情页（标题栏装饰按钮为 `<i>` 元素，无嵌套交互冲突），键盘可达。
+- **悬浮仪器条 Header**：fixed 定位、左上/右下斜切角、铬 ridge 边框、深色半透明 + `backdrop-filter` 模糊、大投影；新增 `--z-header: 40` / `--z-transition: 60` 层级变量；`main` 增加 padding-top 与 `scroll-padding-top` 保证内容与锚点不被遮挡。
+- **毫秒时钟**：终端新增 `SYS.TIME HH:MM:SS.mmm` 实时行（rAF 直写 DOM 不触发 React 重渲染，标签页隐藏自动暂停，减少动态效果下为静态快照）。
+- 组件展台新增「08 导航转场」区；第 04 区终端示例更新为多行查询脚本 + 带时钟的 BOOT 终端。
+
+### 调整
+
+- BOOT 终端行固定为两行（mount / connect），切换频道不再重打；频道信息仍由状态读数行承担。
+- `QueryTerminal` 升级为多行脚本（`open archive.db` → `query --channel=… --limit=12` → `hydrate cards`），打完输出结果行并继续门控文章卡片显示。
+- 移动端（≤680px）隐藏 Hero 精选窗口 FEATURED_POST.EXE，精选文章仍在文章档案区出现。
+- 首页 endnote 文案更新：文章详情已上线，剩余待办为作者资料与发布后台。
+
+### 验证
+
+- `npm run typecheck` 与 `npm run build` 通过（含 4 条静态详情路由）。
+
+## 2026-09-27 — 信号增强：环境动效、Win98 卡片与终端氛围
 
 ### 新增
 

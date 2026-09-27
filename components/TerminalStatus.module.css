@@ -9,6 +9,7 @@
 .progressChars i { display: block; font-style: normal; white-space: nowrap; color: var(--signal); clip-path: inset(0 100% 0 0); animation: bootChars .9s steps(14, end) both; }
 .progressLine strong { color: var(--signal); }
 .prompt { color: var(--signal); }
+.clockLine b { color: var(--signal); font-weight: 700; font-variant-numeric: tabular-nums; }
 .cursor { animation: blink 1s steps(1,end) infinite; }
 .compact { padding: 13px; }
 @keyframes bootChars { to { clip-path: inset(0 0 0 0); } }

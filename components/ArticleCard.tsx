@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { PostSummary } from "@/lib/posts";
 import styles from "./ArticleCard.module.css";
 
@@ -17,33 +18,37 @@ export function ArticleCard({ post, featured = false }: { post: PostSummary; fea
   if (featured) {
     return (
       <article className={`${styles.card} ${styles.featured}`}>
-        <Titlebar issue={post.issue} demo={post.isDemo} kind="FEATURED" />
-        <div className={styles.featureMain}>
-          <div className={styles.featureVisual} aria-hidden="true">
-            <div className={styles.featureDial}><span>FUTURE<br />MEMORY</span></div>
-            <span className={styles.visualIndex}>N° {post.issue} / SIGNAL ARCHIVE</span>
+        <Link href={`/posts/${post.slug}`} className={styles.cardLink} aria-label={`阅读文章：${post.title}`}>
+          <Titlebar issue={post.issue} demo={post.isDemo} kind="FEATURED" />
+          <div className={styles.featureMain}>
+            <div className={styles.featureVisual} aria-hidden="true">
+              <div className={styles.featureDial}><span>FUTURE<br />MEMORY</span></div>
+              <span className={styles.visualIndex}>N° {post.issue} / SIGNAL ARCHIVE</span>
+            </div>
+            <div className={styles.featureBody}>
+              <span className={styles.category}>{post.category}</span>
+              <p className={styles.overline}>FEATURED TRANSMISSION / {post.issue}</p>
+              <h3>{post.title}</h3>
+              <p className={styles.excerpt}>{post.excerpt}</p>
+              <div className={styles.meta}><span>{post.publishedAt.replaceAll("-", ".")}</span><span>{post.readingMinutes} 分钟阅读</span></div>
+            </div>
           </div>
-          <div className={styles.featureBody}>
-            <span className={styles.category}>{post.category}</span>
-            <p className={styles.overline}>FEATURED TRANSMISSION / {post.issue}</p>
-            <h3>{post.title}</h3>
-            <p className={styles.excerpt}>{post.excerpt}</p>
-            <div className={styles.meta}><span>{post.publishedAt.replaceAll("-", ".")}</span><span>{post.readingMinutes} 分钟阅读</span></div>
-          </div>
-        </div>
+        </Link>
       </article>
     );
   }
 
   return (
     <article className={styles.card}>
-      <Titlebar issue={post.issue} demo={post.isDemo} kind="POST" />
-      <div className={styles.body}>
-        <span className={styles.category}>{post.category}</span>
-        <h3>{post.title}</h3>
-        <p className={styles.excerpt}>{post.excerpt}</p>
-        <div className={styles.meta}><span>{post.publishedAt.replaceAll("-", ".")}</span><span>{post.readingMinutes} 分钟</span></div>
-      </div>
+      <Link href={`/posts/${post.slug}`} className={styles.cardLink} aria-label={`阅读文章：${post.title}`}>
+        <Titlebar issue={post.issue} demo={post.isDemo} kind="POST" />
+        <div className={styles.body}>
+          <span className={styles.category}>{post.category}</span>
+          <h3>{post.title}</h3>
+          <p className={styles.excerpt}>{post.excerpt}</p>
+          <div className={styles.meta}><span>{post.publishedAt.replaceAll("-", ".")}</span><span>{post.readingMinutes} 分钟</span></div>
+        </div>
+      </Link>
     </article>
   );
 }

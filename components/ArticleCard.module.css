@@ -35,6 +35,7 @@
   50% { text-shadow: 2px 0 #f4ed18, -2px 0 #b78af0; }
   100% { text-shadow: 2px 2px #2c1546; }
 }
+.cardLink { flex: 1; display: flex; flex-direction: column; min-width: 0; color: inherit; }
 .titlebar { min-height: 30px; display: flex; align-items: center; gap: 8px; padding: 3px 6px 3px 8px; background: var(--win-titlebar-bg); color: #fff; font: 800 12px var(--font-mono); letter-spacing: .05em; }
 .titlebarIcon { flex: none; width: 18px; height: 18px; display: grid; place-items: center; background: var(--signal); color: #20162e; font-size: 11px; }
 .issue { color: var(--signal); font: 900 14px var(--font-mono); text-shadow: 1px 1px #2c1546; white-space: nowrap; }

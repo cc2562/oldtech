@@ -4,7 +4,7 @@ import { useState } from "react";
 import { ArticleCard } from "./ArticleCard";
 import { ChannelKnob, type Channel } from "./ChannelKnob";
 import { HeroParticles } from "./HeroParticles";
-import { QueryTerminal } from "./QueryTerminal";
+import { QueryTerminal, hasQueryPlayed } from "./QueryTerminal";
 import { RetroLink } from "./RetroButton";
 import { RetroWindow } from "./RetroWindow";
 import { SiteInfoDialog } from "./SiteInfoDialog";
@@ -12,16 +12,25 @@ import { TerminalStatus } from "./TerminalStatus";
 import type { PostSummary } from "@/lib/posts";
 import styles from "./HomeConsole.module.css";
 
+const scriptFor = (ch: Channel) => [
+  "open archive.db --mode=ro",
+  `query --channel=${ch} --sort=date.desc --limit=12`,
+  "hydrate cards --skin=win98",
+];
+const scriptKey = (ch: Channel) => scriptFor(ch).join("\n");
+
 export function HomeConsole({ posts, author }: { posts: PostSummary[]; author: string }) {
   const [channel, setChannel] = useState<Channel>("全部");
-  const [ready, setReady] = useState(false);
+  // Returning from an article (client-side nav) skips the query animation:
+  // if this channel's script already played, cards are visible immediately.
+  const [ready, setReady] = useState(() => hasQueryPlayed(scriptKey("全部")));
   const visiblePosts = channel === "全部" ? posts : posts.filter((post) => post.category === channel);
   const featured = channel === "全部" ? visiblePosts.find((post) => post.featured) ?? visiblePosts[0] : visiblePosts[0];
   const rest = visiblePosts.filter((post) => post.id !== featured?.id);
 
   const handleChannelChange = (next: Channel) => {
     if (next === channel) return;
-    setReady(false);
+    setReady(hasQueryPlayed(scriptKey(next)));
     setChannel(next);
   };
 
@@ -49,7 +58,7 @@ export function HomeConsole({ posts, author }: { posts: PostSummary[]; author: s
           </div>
 
           <div className={styles.instrumentRow}>
-            <div className={styles.terminalWrap}><TerminalStatus typewriter lines={["mount /archive", "connect personal_signal", `scan --channel=${channel}`]} /><p className={styles.systemNote}>INFORMATION STREAM <span>›</span> 文章频道已连接 <span>›</span> {visiblePosts.length} 条记录</p></div>
+            <div className={styles.terminalWrap}><TerminalStatus typewriter lines={["mount /archive", "connect personal_signal"]} /><p className={styles.systemNote}>INFORMATION STREAM <span>›</span> 文章频道已连接 <span>›</span> {visiblePosts.length} 条记录</p></div>
             <ChannelKnob value={channel} onChange={handleChannelChange} />
           </div>
           <div className={styles.bottomRail}><span>▲ ARCHIVE ACCESS GRANTED</span><a href="#journal">SCROLL TO JOURNAL ↓</a><span>NO. 0001 / 0004</span></div>
@@ -58,14 +67,14 @@ export function HomeConsole({ posts, author }: { posts: PostSummary[]; author: s
 
       <section id="journal" className={styles.journal} aria-labelledby="journal-title">
         <div className={styles.journalHeader}><div><p>01 // PERSONAL ARCHIVE</p><h2 id="journal-title">最近的信号<span>_</span></h2></div><div className={styles.journalReadout} aria-live="polite">当前频道 <strong>{channel}</strong><br />检索结果 <strong>{String(visiblePosts.length).padStart(2, "0")}</strong> 条 · 演示内容</div></div>
-        <QueryTerminal query={`query --channel=${channel} --sort=date.desc`} result={`${String(visiblePosts.length).padStart(2, "0")} records · DEMO DATA`} onComplete={() => setReady(true)} />
+        <QueryTerminal lines={scriptFor(channel)} result={`${String(visiblePosts.length).padStart(2, "0")} records · DEMO DATA`} onComplete={() => setReady(true)} />
         <div className={styles.journalBody} data-ready={ready || undefined}>
           {featured && <ArticleCard post={featured} featured />}
           {rest.length > 0 && <div className={styles.cards}>{rest.map((post) => <ArticleCard key={post.id} post={post} />)}</div>}
         </div>
       </section>
 
-      <section className={styles.endnote} aria-label="演示说明"><span className={styles.endnoteIcon}>!</span><div><h2>系统仍在装配中</h2><p>这里是视觉与组件演示。文章详情、作者资料和发布后台会在后续阶段接入。</p></div><span className={styles.endnoteCode}>END_OF_SIGNAL</span></section>
+      <section className={styles.endnote} aria-label="演示说明"><span className={styles.endnoteIcon}>!</span><div><h2>系统仍在装配中</h2><p>文章与评论均为演示内容。作者资料和发布后台会在后续阶段接入。</p></div><span className={styles.endnoteCode}>END_OF_SIGNAL</span></section>
     </>
   );
 }
