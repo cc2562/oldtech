@@ -1,0 +1,16 @@
+.git
+.github
+.next
+node_modules
+.env*
+!.env.example
+media
+public/vditor
+*.zip
+*.tar
+*.tar.gz
+*.tsbuildinfo
+.idea
+.codebuddy
+.workbuddy
+.playwright-cli

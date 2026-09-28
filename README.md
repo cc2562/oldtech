@@ -51,17 +51,76 @@ npm run dev
 
 ## 生产部署
 
-在服务器提供 PostgreSQL、Node.js 进程、`MEDIA_DIR` 持久化目录和 HTTPS 反向代理。反向代理须传递原始 Host、协议，并覆盖客户端传入的 `X-Forwarded-For`；评论限流依赖可信的客户端 IP。发布新版本时先备份数据库与图片目录，再执行：
+生产环境使用 Docker 镜像：GitHub Actions 构建并发布到 GHCR，服务器只拉取镜像、迁移数据库并运行应用。本机 WSL 构建可作为备用路径。服务器需要 Linux x86_64、Docker Engine 与 Compose 插件，以及已有的 PostgreSQL 和宝塔 HTTPS 反向代理。应用与宿主机共享网络，因此 `DATABASE_URL` 可以连接 `127.0.0.1:5432`；应用仅监听 `127.0.0.1:3000`，宝塔反向代理上游指向该地址。反向代理须传递原始 Host、协议，并覆盖客户端传入的 `X-Forwarded-For`；评论限流依赖可信的客户端 IP。
+
+### GitHub 云端构建
+
+将仓库推送到 GitHub 的 `master` 分支后，`.github/workflows/build-image.yml` 会在 GitHub 托管的 Ubuntu 运行器上构建 `linux/amd64` 镜像，发布为 `ghcr.io/<owner>/<repo>:<完整提交 SHA>`。也可在 GitHub Actions 页面手动运行该工作流。先确认工作流成功及镜像标签，再在服务器部署；本地不需要构建或上传大型归档。工作流用 `GITHUB_TOKEN` 推送镜像，不使用生产数据库密码或 Payload 密钥。
+
+GHCR 首次发布的包默认是私有的。服务器首次拉取前，用具有 `read:packages` 权限的 GitHub 个人访问令牌（classic）登录；若将包改为公开，可省略登录。登录用户应与后续执行 Compose 的用户相同。
 
 ```bash
-npm ci
-npm run db:migrate
-npm run build
-npm run start
+read -rsp 'GHCR token: ' GHCR_TOKEN; echo
+printf '%s' "$GHCR_TOKEN" | docker login ghcr.io -u <GitHub用户名> --password-stdin
+unset GHCR_TOKEN
 ```
 
-生产环境关闭数据库自动 `push`，由仓库内 `migrations/` 的迁移文件更新结构。改动 Payload 模型后，在开发机执行 `npx payload generate:types`、`npx payload generate:importmap`、`npx payload migrate:create <name>` 并提交生成文件。定期同时备份 PostgreSQL 与 `MEDIA_DIR`；两者需作为同一恢复点保存。
+在服务器 `/opt/oldtech/.env.production` 中设置 `IMAGE_NAME=ghcr.io/<owner>/<repo>` 和 `IMAGE_TAG=<完整提交 SHA>`；镜像名必须全为小写。将仓库中的 `compose.prod.yaml` 传到服务器 `/opt/oldtech/`，之后每次发布只需更新标签并执行下方的拉取与发布命令。
+
+### 本机 WSL 备用构建与传输
+
+在仓库根目录的 PowerShell 中执行。当前 WSL Ubuntu 的 Docker 服务可用，但普通用户无 Docker socket 权限，所以通过 WSL root 调用 Docker；镜像在 WSL 中构建，无需在 Windows 安装 Docker Desktop。
+
+```powershell
+$tag = (git rev-parse --short HEAD).Trim()
+wsl -d Ubuntu -u root -- sh -lc "cd /mnt/c/dev/oldtech && docker buildx build --platform linux/amd64 --load -t oldtech:$tag ."
+wsl -d Ubuntu -u root -- sh -lc "docker save oldtech:$tag | gzip -1 > /mnt/c/dev/oldtech-$tag.tar.gz"
+scp "C:\dev\oldtech-$tag.tar.gz" user@server:/tmp/
+scp compose.prod.yaml user@server:/opt/oldtech/
+```
+
+本机路径使用短提交号；备用部署时将服务器 `IMAGE_NAME` 设为 `oldtech`、`IMAGE_TAG` 设为该短提交号，并把归档传到服务器。发布未提交的改动时，应先提交，使标签能准确对应源码。把示例中的 `user@server` 换成实际 SSH 地址；传输前在服务器创建 `/opt/oldtech` 并赋予 SSH 用户写入权限。镜像归档放在仓库外，避免进入下一次构建上下文。
+
+### 服务器首次配置
+
+在服务器 `/opt/oldtech/.env.production` 写入以下变量，并限制该文件的读取权限。把数据库、密钥和媒体目录改成实际值；此文件只留在服务器，不传进镜像或提交到 Git。已有图片应位于 `MEDIA_HOST_DIR` 指向的目录。
+
+```dotenv
+IMAGE_NAME=ghcr.io/<owner>/<repo>
+IMAGE_TAG=<完整提交 SHA>
+MEDIA_HOST_DIR=/opt/oldtech/media
+DATABASE_URL=postgresql://oldtech:<密码>@127.0.0.1:5432/oldtech
+PAYLOAD_SECRET=<至少32字节随机值>
+PREVIEW_SECRET=<另一独立随机值>
+```
+
+数据库密码含特殊字符时先按 URL 规则编码。创建媒体目录并确保 Docker 容器可读写；生产配置始终将其挂载到容器的 `/app/media`，无需在环境文件中设置 `MEDIA_DIR`。例如：
+
+```bash
+cd /opt/oldtech
+mkdir -p media backups
+chmod 600 .env.production
+```
+
+### 每次发布与回滚
+
+先将 `.env.production` 中的 `IMAGE_TAG` 更新为 GitHub Actions 已发布的完整提交 SHA，再备份数据库和图片，并把两者作为同一恢复点保存。下面的数据库名和用户是示例，按现有 PostgreSQL 配置调整；若媒体目录不是 `/opt/oldtech/media`，备份命令也应使用实际目录。若当前还有旧的 Node.js 应用占用 3000 端口，先停止旧进程，再执行迁移与启动。迁移失败时不要启动新版本。
+
+```bash
+cd /opt/oldtech
+pg_dump -Fc -h 127.0.0.1 -U oldtech oldtech > "backups/oldtech-$(date +%Y%m%d-%H%M%S).dump"
+tar -C /opt/oldtech -czf "backups/media-$(date +%Y%m%d-%H%M%S).tar.gz" media
+docker compose --env-file .env.production -f compose.prod.yaml pull app
+docker compose --env-file .env.production -f compose.prod.yaml run --rm --no-deps app npm run db:migrate
+docker compose --env-file .env.production -f compose.prod.yaml up -d --no-build
+docker compose --env-file .env.production -f compose.prod.yaml logs --tail=100 app
+curl -I http://127.0.0.1:3000/
+```
+
+回滚应用时将 `IMAGE_TAG` 改回旧镜像的提交号并再次 `up -d --no-build`；若本次迁移与旧版本不兼容，还需从同一恢复点恢复 PostgreSQL 与媒体目录。使用本机备用构建时，以 `gzip -dc /tmp/oldtech-<短提交号>.tar.gz | docker load` 代替 `docker compose pull app`。
+
+生产环境关闭数据库自动 `push`，由仓库内 `migrations/` 的迁移文件更新结构。改动 Payload 模型后，在开发机执行 `npx payload generate:types`、`npx payload generate:importmap`、`npx payload migrate:create <name>` 并提交生成文件。定期同时备份 PostgreSQL 与图片目录。若旧服务器上的构建曾卡死，可检查构建最后一段日志、`journalctl -k` 中的 OOM 记录及当时的内存使用；Docker 避免在服务器编译，但不代表原原因已经确认。
 
 ## 验证
 
-运行 `npm run typecheck` 与 `npm run build`。接入数据库后还需验证后台登录、草稿预览与退出、发布和撤回、图片上传、友链发布，以及评论审核开关的两种提交路径。未登录访问草稿 slug 应得到 404。
+本地运行 `npm run typecheck`，并确认 GitHub Actions 构建成功；备用路径可在 WSL 中构建镜像。服务器发布后检查首页、`/admin`、宝塔 HTTPS 代理、已有图片和新图片上传；接入数据库后还需验证后台登录、草稿预览与退出、发布和撤回、友链发布，以及评论审核开关的两种提交路径。未登录访问草稿 slug 应得到 404。

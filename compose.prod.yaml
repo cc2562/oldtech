@@ -1,0 +1,12 @@
+services:
+  app:
+    image: ${IMAGE_NAME:-oldtech}:${IMAGE_TAG:?Set IMAGE_TAG in .env.production}
+    network_mode: host
+    env_file: .env.production
+    environment:
+      NODE_ENV: production
+      MEDIA_DIR: /app/media
+    volumes:
+      - ${MEDIA_HOST_DIR:?Set MEDIA_HOST_DIR in .env.production}:/app/media
+    restart: unless-stopped
+    init: true
